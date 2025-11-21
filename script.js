@@ -287,11 +287,12 @@ ensureThree(function initGreenSmoke() {
 	const instaFrame = document.querySelector('.insta-slideshow');
 	if (!instaFrame) return;
 
-	// placeholder images - replace these URLs with your Instagram image URLs or local assets
+	// Use provided Instagram post URLs for quick content testing.
+	// These open the Instagram post in a new tab when clicked (reliable without needing oEmbed APIs).
 	const images = [
-		'https://images.unsplash.com/photo-1504198453319-5ce911bafcde?w=1200&q=60&auto=format&fit=crop',
-		'https://images.unsplash.com/photo-1528879300202-0d6a3a9ad5e7?w=1200&q=60&auto=format&fit=crop',
-		'https://images.unsplash.com/photo-1546443046-ed1ce6ffd1be?w=1200&q=60&auto=format&fit=crop'
+		'https://www.instagram.com/p/DPKXw_vj1rb/',
+		'https://www.instagram.com/p/DPKXw_vj1rb/',
+		'https://www.instagram.com/p/DMeQjlKS1gv/'
 	];
 
 	const imageEl = instaFrame.querySelector('.insta-image');
@@ -302,9 +303,18 @@ ensureThree(function initGreenSmoke() {
 
 	function show(i) {
 		idx = (i + images.length) % images.length;
+		const url = images[idx];
 		imageEl.style.opacity = 0;
 		setTimeout(() => {
-			imageEl.style.backgroundImage = `url('${images[idx]}')`;
+			// If the item looks like an Instagram post URL, render a clickable card that opens the post.
+			if (typeof url === 'string' && url.includes('instagram.com')) {
+				imageEl.style.backgroundImage = '';
+				imageEl.innerHTML = `<a class="insta-post-link" href="${url}" target="_blank" rel="noopener noreferrer">Open Instagram post</a>`;
+			} else {
+				// fallback: treat as direct image URL
+				imageEl.innerHTML = '';
+				imageEl.style.backgroundImage = `url('${url}')`;
+			}
 			imageEl.style.opacity = 1;
 		}, 220);
 	}
@@ -376,11 +386,68 @@ ensureThree(function initGreenSmoke() {
 				ifr.dataset.loaded = '1';
 			}
 		});
-		// If this is the YouTube option, ensure the YT player is initialized and controls hooked
+		// If this is the YouTube option, set up a simple test playlist controller
 		if (opt.dataset.type === 'youtube') {
-			const ytIframe = opt.querySelector('iframe.youtube-embed');
-			if (ytIframe) initYouTubeForIframe(ytIframe, opt);
+			setupTestYouTubePlaylist(opt);
 		}
+	}
+
+	function derivePlatformLink(opt) {
+		if (!opt) return null;
+		// try to find an iframe with a data-src and convert to a user-facing URL
+		const iframe = opt.querySelector('iframe[data-src]');
+		if (iframe && iframe.dataset && iframe.dataset.src) {
+			const src = iframe.dataset.src;
+			try {
+				if (src.includes('player.twitch.tv') || src.includes('twitch.tv')) {
+					const m = src.match(/[?&]channel=([^&]+)/);
+					const channel = m ? decodeURIComponent(m[1]) : 'cook14u';
+					return { href: `https://twitch.tv/${channel}`, platform: 'twitch' };
+				}
+				if (src.includes('youtube.com')) {
+					const m = src.match(/[?&]list=([^&]+)/);
+					if (m) return { href: `https://www.youtube.com/playlist?list=${m[1]}`, platform: 'youtube' };
+					// fallback to channel/home
+					return { href: 'https://www.youtube.com', platform: 'youtube' };
+				}
+				if (src.includes('twitframe.com') || src.includes('x.com')) {
+					// treat legacy X embeds as TikTok replacement (show TikTok profile instead)
+					// Prefer returning a TikTok profile URL for the Cook14U handle.
+					return { href: 'https://www.tiktok.com/@Cook14U', platform: 'tiktok' };
+				}
+			} catch (e) { /* fall through */ }
+		}
+		// special-case based on data-type attribute
+		const typ = opt.dataset.type;
+		switch(typ) {
+			case 'twitch': return { href: 'https://twitch.tv/cook14u', platform: 'twitch' };
+			case 'youtube': return { href: 'https://www.youtube.com/@Cook14u', platform: 'youtube' };
+			case 'instagram': return { href: 'https://www.instagram.com/cook14u2/', platform: 'instagram' };
+			case 'tiktok': return { href: 'https://www.tiktok.com/@Cook14U', platform: 'tiktok' };
+			default: return null;
+		}
+	}
+
+	function updateContentLinkForOption(opt) {
+		const linkWrap = document.getElementById('content-links');
+		const linkBtn = document.getElementById('content-link-btn');
+		if (!linkWrap || !linkBtn) return;
+		if (!opt || !opt.classList.contains('active')) {
+			linkWrap.style.display = 'none';
+			linkWrap.setAttribute('aria-hidden', 'true');
+			return;
+		}
+		const info = derivePlatformLink(opt);
+		if (!info) { linkWrap.style.display = 'none'; linkWrap.setAttribute('aria-hidden','true'); return; }
+		linkBtn.href = info.href;
+		// show only the platform name (e.g. "Twitch", "YouTube")
+		const platformLabel = info.platform.charAt(0).toUpperCase() + info.platform.slice(1);
+		linkBtn.textContent = platformLabel;
+		linkBtn.setAttribute('aria-label', `Open ${platformLabel}`);
+		linkBtn.title = `Open ${platformLabel}`;
+		linkBtn.setAttribute('data-platform', info.platform);
+		linkWrap.style.display = 'flex';
+		linkWrap.setAttribute('aria-hidden', 'false');
 	}
 
 	const optionsContainer = document.querySelector('.options');
@@ -434,6 +501,8 @@ ensureThree(function initGreenSmoke() {
 
 			// load any embeds in the newly active option
 			loadEmbedsInOption(this);
+			// update the dynamic content link area to reflect the opened card
+			updateContentLinkForOption(this);
 		});
 	});
 
@@ -446,11 +515,14 @@ ensureThree(function initGreenSmoke() {
 		if (!opt) return;
 		opt.classList.remove('active');
 		if (optionsContainer) optionsContainer.classList.remove('single-open');
+		// hide content link when card closed
+		updateContentLinkForOption(null);
 	});
 
 	// Ensure the initially active option has its embeds loaded
 	const initial = document.querySelector('.option.active');
 	if (initial) loadEmbedsInOption(initial);
+	if (initial) updateContentLinkForOption(initial);
 })();
 
 // YouTube IFrame API helper + control hookup
@@ -513,6 +585,38 @@ function initYouTubeForIframe(iframe, optionEl) {
 	}).catch(err => {
 		console.warn('YouTube API failed to load', err);
 	});
+}
+
+// Lightweight test playlist for the YouTube option (uses plain embed URLs)
+function setupTestYouTubePlaylist(optionEl) {
+	const vids = ['_s7S_WybcRM','rc40cT5XKuI']; // removed middle video per user request
+	const iframe = optionEl.querySelector('iframe.youtube-embed');
+	if (!iframe) return;
+
+	// initialize index
+	if (!iframe.dataset.playIndex) iframe.dataset.playIndex = '0';
+
+	function updateSrc() {
+		const idx = parseInt(iframe.dataset.playIndex || '0', 10) % vids.length;
+		const id = vids[(idx + vids.length) % vids.length];
+		iframe.src = `https://www.youtube.com/embed/${id}?rel=0&autoplay=0&enablejsapi=0`;
+		iframe.dataset.loaded = '1';
+	}
+
+	// wire prev/next buttons to cycle through the test list
+	const prev = optionEl.querySelector('.yt-prev');
+	const next = optionEl.querySelector('.yt-next');
+	if (prev && !prev.dataset.boundPlaylist) {
+		prev.addEventListener('click', function(e){ e.stopPropagation(); e.preventDefault(); let i = parseInt(iframe.dataset.playIndex||'0',10); i = (i - 1 + vids.length) % vids.length; iframe.dataset.playIndex = String(i); updateSrc(); });
+		prev.dataset.boundPlaylist = '1';
+	}
+	if (next && !next.dataset.boundPlaylist) {
+		next.addEventListener('click', function(e){ e.stopPropagation(); e.preventDefault(); let i = parseInt(iframe.dataset.playIndex||'0',10); i = (i + 1) % vids.length; iframe.dataset.playIndex = String(i); updateSrc(); });
+		next.dataset.boundPlaylist = '1';
+	}
+
+	// always set initial test src (override any placeholder playlist) and mark loaded
+	updateSrc();
 }
 
 	// Modal click inspector (optional) - enable by adding ?debug_modals=1 to the URL
@@ -840,3 +944,96 @@ function initYouTubeForIframe(iframe, optionEl) {
 
 	// Initialize when DOM is ready (ensures .home-overlay exists)
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLeftLines); else initLeftLines();
+
+	/* Live indicator behaviour: check Twitch live status (best-effort) and wire click actions
+	   - left-click: when live -> open twitch content panel; when offline -> scroll to Discord/community
+	   - context menu (right-click) toggles a manual force-live override for testing (stored in localStorage)
+	   Note: the live-check uses a public endpoint where possible; if unavailable the indicator falls back to manual override.
+	*/
+	(function liveIndicatorController(){
+		const btn = document.getElementById('live-indicator');
+		if (!btn) return;
+		let forced = localStorage.getItem('cook14u_force_live') === '1';
+		let isLive = false;
+
+		// Demo toggle button (temporary): wire a small visible toggle to force live state for testing
+		const demoBtn = document.getElementById('demo-live-toggle');
+		if (demoBtn) {
+			// show the demo button (it's hidden by default in HTML to avoid accidental production exposure)
+			demoBtn.style.display = 'inline-flex';
+			demoBtn.classList.toggle('active', forced);
+			demoBtn.textContent = forced ? 'Demo: ON' : 'Demo: OFF';
+			demoBtn.addEventListener('click', function(e){
+				forced = !forced;
+				if (forced) localStorage.setItem('cook14u_force_live','1'); else localStorage.removeItem('cook14u_force_live');
+				demoBtn.classList.toggle('active', forced);
+				demoBtn.textContent = forced ? 'Demo: ON' : 'Demo: OFF';
+				checkNow();
+			});
+		}
+
+		function setLive(v){
+			isLive = !!v;
+			if (isLive) btn.classList.add('is-live'); else btn.classList.remove('is-live');
+			btn.setAttribute('aria-pressed', String(isLive));
+			btn.title = isLive ? 'Cook14U is LIVE — click to open Twitch' : 'Offline — click to open Discord (or open community)';
+		}
+
+		function openTwitchOption(){
+			const twitchOpt = document.querySelector('.option[data-type="twitch"]');
+			if (twitchOpt) {
+				// ensure options container visible on mobile by simulating click
+				twitchOpt.click();
+				// scroll content into view
+				const content = document.getElementById('content');
+				if (content) content.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+		}
+
+		function openDiscordSection(){
+			const community = document.getElementById('community');
+			if (community) {
+				community.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				const discordIframe = community.querySelector('iframe.discord-embed');
+				if (discordIframe && discordIframe.dataset && discordIframe.dataset.src && !discordIframe.dataset.loaded) {
+					discordIframe.src = discordIframe.dataset.src;
+					discordIframe.dataset.loaded = '1';
+				}
+			}
+		}
+
+		btn.addEventListener('click', function(e){
+			// normal click: open target depending on live state
+			if (forced) { setLive(true); }
+			if (isLive) openTwitchOption(); else openDiscordSection();
+		});
+
+		// right-click toggles manual override (for testing)
+		btn.addEventListener('contextmenu', function(e){
+			e.preventDefault();
+			forced = !forced;
+			if (forced) localStorage.setItem('cook14u_force_live','1'); else localStorage.removeItem('cook14u_force_live');
+			checkNow();
+		});
+
+		async function checkNow(){
+			// forced override always shows live
+			if (forced) { setLive(true); return; }
+
+			try {
+				// best-effort public status check. This endpoint is unauthenticated and may change
+				const resp = await fetch('https://decapi.me/twitch/stream/cook14u');
+				const txt = (await resp.text()).toLowerCase();
+				const live = txt.includes('live') || txt.includes('true') || txt.includes('online') || txt.includes('streaming');
+				setLive(live);
+			} catch (err) {
+				// network or endpoint failed — assume offline but keep manual override available
+				console.warn('Live check failed', err);
+				setLive(false);
+			}
+		}
+
+		// initial state and interval poll (every 60s)
+		checkNow();
+		setInterval(checkNow, 60000);
+	})();

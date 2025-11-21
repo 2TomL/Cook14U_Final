@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +14,12 @@
 			<a href="#home" class="navbar-logo">
 				<img src="assets/Cook14U_Logo_ProfilePic_X_2160x2160.png" alt="Logo" />
 			</a>
+			<!-- Live indicator: shows camera icon; when live animated background appears -->
+			<button id="live-indicator" class="live-indicator" aria-label="Live status" title="Live status">
+				<img src="assets/video-camera.png" alt="Live" />
+			</button>
+			<!-- Demo toggle (temporary) - toggles the forced live override for visual testing -->
+			<button id="demo-live-toggle" class="demo-toggle" aria-label="Toggle demo live" title="Toggle demo live" style="display:none;">Demo</button>
 			<button class="hamburger-menu" id="hamburger-menu" aria-label="Menu">
 				<span></span>
 				<span></span>
@@ -36,7 +42,7 @@
 		</div>
 		<div class="home-overlay">
 			<div class="home-photo-bg">
-				<img src="assets/hole in wall1.png" alt="Home Foto" class="home-photo-full" />
+				<img src="assets/hole in wall1.png" alt="Home Photo" class="home-photo-full" />
 			</div>
 			<div class="logo-fire-container">
 				<div class="fire-effect-container">
@@ -85,7 +91,7 @@
 					</div>
 				</div>
 				<div class="panel">
-					<button class="option-close" aria-label="Sluiten">✕</button>
+					<button class="option-close" aria-label="Close">✕</button>
 					<!-- Twitch iframe is only set when the option becomes active -->
 					<iframe class="embed-iframe twitch-embed" data-src="https://player.twitch.tv/?channel=cook14u&parent=localhost" frameborder="0" allowfullscreen="true" scrolling="no" title="Twitch Player"></iframe>
 				</div>
@@ -101,12 +107,12 @@
 					</div>
 				</div>
 				<div class="panel">
-					<button class="option-close" aria-label="Sluiten">✕</button>
+					<button class="option-close" aria-label="Close">✕</button>
 					<!-- Replace PLAYLIST_ID with the desired playlist id; keep enablejsapi=1 for controls to work -->
 					<iframe id="youtube-player-iframe" class="embed-iframe youtube-embed" data-src="https://www.youtube.com/embed?listType=playlist&list=PLAYLIST_ID&autoplay=0&rel=0&enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen title="YouTube Playlist"></iframe>
 					<div class="yt-controls">
-						<button class="yt-prev" aria-label="Vorige">◀</button>
-						<button class="yt-next" aria-label="Volgende">▶</button>
+						<button class="yt-prev" aria-label="Previous">◀</button>
+						<button class="yt-next" aria-label="Next">▶</button>
 					</div>
 				</div>
 			</div>
@@ -121,31 +127,35 @@
 					</div>
 				</div>
 				<div class="panel insta-panel">
-					<button class="option-close" aria-label="Sluiten">✕</button>
+					<button class="option-close" aria-label="Close">✕</button>
 					<div class="insta-slideshow">
 						<div class="insta-image" aria-hidden="false"></div>
 						<div class="insta-controls">
-							<button class="insta-prev" aria-label="Vorige">◀</button>
-							<button class="insta-next" aria-label="Volgende">▶</button>
+							<button class="insta-prev" aria-label="Previous">◀</button>
+							<button class="insta-next" aria-label="Next">▶</button>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<div class="option" data-type="x">
+			<div class="option" data-type="tiktok">
 				<div class="shadow"></div>
 				<div class="label">
-						<div class="icon"><img src="assets/insta_tr_icon.png" alt="Instagram" class="option-icon"/></div>
+						<div class="icon"><img src="assets/insta_tr_icon.png" alt="TikTok" class="option-icon"/></div>
 					<div class="info">
-						<div class="main">X Feed</div>
+						<div class="main">TikTok Feed</div>
 						<div class="sub">Latest posts</div>
 					</div>
 				</div>
 				<div class="panel">
-					<button class="option-close" aria-label="Sluiten">✕</button>
-					<iframe class="embed-iframe x-embed" data-src="https://twitframe.com/show?url=https://x.com/Cook14U" frameborder="0" allowfullscreen title="X Feed"></iframe>
+					<button class="option-close" aria-label="Close">✕</button>
+					<iframe class="embed-iframe tiktok-embed" data-src="https://www.tiktok.com/@Cook14U" frameborder="0" allowfullscreen title="TikTok Feed"></iframe>
 				</div>
 			</div>
+		</div>
+		<!-- Dynamic content links: shows a single platform link for the currently-open card -->
+		<div id="content-links" class="content-links" aria-hidden="true" style="display:none;">
+			<a id="content-link-btn" class="wz-btn content-link" href="#" target="_blank" rel="noopener noreferrer">Open</a>
 		</div>
 	</section>
 	<section id="community" class="section">
@@ -171,7 +181,7 @@
 	</section>
 	<section id="merch" class="section">
 		<h1 class="section-title">Merch/Support</h1>
-		<!-- Invulling volgt -->
+		<!-- Content coming soon -->
 	</section>
 
 	<!-- Warzone-style setup modal -->

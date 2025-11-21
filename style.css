@@ -219,6 +219,88 @@ html { scroll-behavior: smooth; }
 	border-radius: 50%;
 	box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
+
+/* Live indicator (camera icon) next to logo */
+.live-indicator {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background: transparent;
+	border: 0;
+	margin-left: 10px;
+	padding: 6px;
+	box-sizing: border-box;
+	cursor: pointer;
+	position: relative;
+	z-index: 2200;
+}
+.live-indicator img { width: 28px; height: 28px; display:block; border-radius:50%; }
+
+/* Improved live indicator: smaller badge positioned top-right so it doesn't cover the icon */
+.live-indicator img { position: relative; z-index: 4; }
+.live-indicator.is-live::before {
+	/* small badge dot positioned near top-right of the button */
+	content: '';
+	position: absolute;
+	right: 8px; top: 8px;
+	transform: none;
+	width: 10px; height: 10px;
+	border-radius: 50%;
+	background: radial-gradient(circle, #ff6b6b 0%, #ff3b3b 60%);
+	box-shadow: 0 0 8px rgba(255,70,70,0.9);
+	z-index: 5; /* above pulse but below icon z-index 6 ensures icon remains clear */
+	pointer-events: none;
+}
+.live-indicator.is-live::after {
+	/* softer blurred pulse anchored to the same top-right point */
+	content: '';
+	position: absolute;
+	right: 6px; top: 6px;
+	transform: translate(0, 0);
+	width: 40px; height: 40px;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(255,80,80,0.9) 0%, rgba(255,60,60,0.6) 28%, rgba(255,60,60,0.18) 54%, rgba(255,60,60,0) 72%);
+	filter: blur(6px);
+	animation: livePulse 1600ms cubic-bezier(0.22, 0.9, 0.2, 1) infinite;
+	pointer-events: none;
+	z-index: 3;
+}
+
+@keyframes livePulse {
+	0% { transform: scale(0.85); opacity: 0.9; }
+	50% { transform: scale(1.06); opacity: 0.55; }
+	100% { transform: scale(1.9); opacity: 0; }
+}
+
+/* Slight visual when live: stronger icon glow but keep it readable */
+.live-indicator.is-live img { filter: drop-shadow(0 6px 10px rgba(255,50,50,0.35)); }
+
+/* Demo toggle button (temporary for visual testing) */
+.demo-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 8px;
+	padding: 6px 8px;
+	border-radius: 6px;
+	background: linear-gradient(180deg, #0f1315, #050607);
+	color: #dcefff;
+	border: 1px solid rgba(var(--seahawks-blue-rgb), 0.12);
+	font-weight: 700;
+	font-size: 0.75rem;
+	cursor: pointer;
+}
+.demo-toggle.active { background: linear-gradient(180deg, rgba(255,40,40,0.14), rgba(255,40,40,0.08)); border-color: rgba(255,40,40,0.18); }
+
+@media (max-width: 900px) {
+	/* ensure navbar icon doesn't crowd logo on small screens */
+	.live-indicator { width: 40px; height: 40px; margin-left: 8px; }
+	.live-indicator img { width: 26px; height: 26px; }
+	.demo-toggle { margin-left: 6px; padding: 5px 7px; font-size: 0.7rem; }
+}
 .navbar-links {
 	list-style: none;
 	display: flex;
@@ -238,8 +320,32 @@ html { scroll-behavior: smooth; }
 	font-weight: bold;
 	font-family: 'XBall', Arial, sans-serif;
 	padding: 0.5rem 1rem;
-	border-radius: 4px;
-	transition: background 0.2s;
+	border-radius: 6px;
+	transition: color 180ms ease, background 220ms ease, transform 200ms cubic-bezier(0.2,0.9,0.2,1), box-shadow 220ms ease;
+	position: relative;
+	will-change: transform, box-shadow;
+}
+
+/* Animated underline accent and improved hover/focus visuals */
+.navbar-links a::after {
+	content: '';
+	position: absolute;
+	left: 50%;
+	bottom: 8px;
+	transform: translateX(-50%) scaleX(0);
+	transform-origin: center;
+	width: 56%;
+	height: 3px;
+	border-radius: 3px;
+	/* Seahawks-style multi-stop gradient underline */
+	background: linear-gradient(90deg,
+		rgba(var(--seahawks-blue-rgb),1) 0%,
+		rgba(0,192,255,0.92) 60%,
+		rgba(0,255,170,0.88) 100%);
+	box-shadow: 0 6px 18px rgba(var(--seahawks-blue-rgb),0.12), 0 6px 26px rgba(0,192,255,0.06);
+	transition: transform 240ms cubic-bezier(0.2,0.9,0.2,1), opacity 180ms ease;
+	opacity: 0;
+	pointer-events: none;
 }
 .section-title {
 	font-family: 'XBall', Arial, sans-serif;
@@ -261,8 +367,20 @@ html { scroll-behavior: smooth; }
 .home-bg .section-title {
 	margin-top: 60vh;
 }
-.navbar-links a:hover {
-	background: #444;
+.navbar-links a:hover,
+.navbar-links a:focus {
+	background: transparent; /* remove hover background as requested */
+	transform: translateY(-3px); /* keep slight lift for visual feedback */
+	box-shadow: none; /* remove hover box/shadow (frame) */
+	outline: none;
+}
+.navbar-links a:focus-visible {
+	box-shadow: 0 0 0 4px rgba(var(--seahawks-blue-rgb), 0.12), 0 8px 20px rgba(var(--seahawks-blue-rgb), 0.06);
+}
+.navbar-links a:hover::after,
+.navbar-links a:focus::after {
+	transform: translateX(-50%) scaleX(1);
+	opacity: 1;
 }
 
 .section {
@@ -1152,6 +1270,62 @@ padding: 0 1rem;
 /* Instagram slideshow */
 .insta-slideshow { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .insta-image { width: 100%; aspect-ratio: 16 / 9; height: auto; background-size: cover; background-position: center; border-radius: 8px; transition: opacity 0.45s ease, transform 0.45s ease; }
+/* Clickable Instagram post card (fallback when direct image isn't available) */
+.insta-image .insta-post-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 80%;
+	max-width: 640px;
+	height: 60%;
+	min-height: 160px;
+	background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.72));
+	color: #fff;
+	text-decoration: none;
+	font-weight: 800;
+	letter-spacing: 0.6px;
+	padding: 12px 18px;
+	border-radius: 12px;
+	border: 2px solid rgba(255,255,255,0.03);
+	box-shadow: 0 14px 40px rgba(0,0,0,0.6), 0 6px 18px rgba(255,80,80,0.06);
+}
+.insta-image .insta-post-link:hover { transform: translateY(-4px); box-shadow: 0 20px 44px rgba(0,0,0,0.7), 0 8px 26px rgba(255,80,80,0.08); }
+
+/* Container for the dynamic platform link shown under content cards */
+.content-links {
+	display: flex;
+	justify-content: center;
+	margin-top: 12px;
+	margin-bottom: 28px;
+}
+.content-link {
+	/* Match Warzone-style .wz-btn for consistent button appearance */
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 14px;
+	background: linear-gradient(180deg, #0f1315, #050607);
+	color: #dcefff;
+	text-decoration: none;
+	border-radius: 6px;
+	border: 1px solid rgba(var(--seahawks-blue-rgb), 0.14);
+	box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 8px 20px rgba(0,0,0,0.6);
+	font-weight: 800;
+	letter-spacing: 1.6px;
+	text-transform: uppercase;
+	font-size: 0.85rem;
+	cursor: pointer;
+}
+.content-link:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 28px rgba(var(--seahawks-blue-rgb), 0.12); }
+.content-link[data-platform="twitch"],
+.content-link[data-platform="youtube"],
+.content-link[data-platform="instagram"],
+.content-link[data-platform="x"] {
+	/* Use the same base styling as .wz-btn so all platform links look identical */
+	background: linear-gradient(180deg, #0f1315, #050607);
+	border: 1px solid rgba(var(--seahawks-blue-rgb), 0.14);
+	color: #dcefff;
+}
 .insta-controls { position: absolute; right: 12px; bottom: 12px; display: flex; gap: 8px; z-index: 4; }
 .insta-controls button { background: rgba(0,0,0,0.32); color: #fff; border: 1px solid rgba(255,255,255,0.04); padding: 6px 8px; border-radius: 6px; cursor: pointer; }
 .insta-controls button:hover { background: rgba(0,0,0,0.5); }
@@ -1460,7 +1634,7 @@ padding: 0 1rem;
 .option[data-type="twitch"] { background-image: url('assets/card5.png'); background-size: cover; background-position: center; background-repeat: no-repeat; }
 .option[data-type="youtube"] { background-image: url('assets/card3.png'); background-size: cover; background-position: center; background-repeat: no-repeat; }
 .option[data-type="instagram"] { background-image: url('assets/card2.png'); background-size: cover; background-position: center; background-repeat: no-repeat; }
-.option[data-type="x"] { background-image: url('assets/card1.png'); background-size: cover; background-position: center; background-repeat: no-repeat; }
+.option[data-type="tiktok"] { background-image: url('assets/card1.png'); background-size: cover; background-position: center; background-repeat: no-repeat; }
 
 @media screen and (max-width: 820px) {
 	.options { min-width: 520px; }
