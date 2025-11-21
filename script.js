@@ -68,6 +68,31 @@ if (fireCanvas) {
 	animate();
 }
 
+// Detect legacy iOS (e.g. iPhone7 on iOS 15.8.5) or data-saver to reduce heavy effects
+function __cook14u_isLegacyIOS() {
+	try {
+		const ua = navigator.userAgent || '';
+		// match iPhone/iPad/iPod OS like: OS 15_8_5
+		const m = ua.match(/OS (\d+)_?(\d+)?_?(\d+)?/);
+		const isiOS = /iP(hone|od|ad)/.test(ua);
+		if (!isiOS || !m) return false;
+		const major = parseInt(m[1] || '0', 10);
+		const minor = parseInt(m[2] || '0', 10);
+		const patch = parseInt(m[3] || '0', 10);
+		// If major < 15 treat as legacy; if exactly 15, consider 15.8.5 and below legacy
+		if (major < 15) return true;
+		if (major > 15) return false;
+		// major === 15
+		if (minor < 8) return true;
+		if (minor === 8 && patch <= 5) return true;
+		return false;
+	} catch (e) { return false; }
+}
+
+// global low-power mode flag used across scripts
+window.__cook14u_lowPowerMode = (__cook14u_isLegacyIOS() || (navigator.connection && navigator.connection.saveData));
+if (window.__cook14u_lowPowerMode) console.info('Cook14U: lowPowerMode enabled — reducing effects for older iOS / data-saver');
+
 // Hamburger menu toggle
 const hamburger = document.getElementById('hamburger-menu');
 const navLinks = document.querySelector('.navbar-links');
@@ -217,6 +242,8 @@ document.addEventListener('keydown', function(e) { if (e.key !== 'Escape') retur
 function ensureThree(callback) { if (typeof THREE !== 'undefined') return callback(); const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js'; s.onload = callback; s.onerror = function() { console.warn('Failed to load Three.js for smoke effect'); }; document.head.appendChild(s); }
 
 ensureThree(function initGreenSmoke() {
+	// If low-power mode (older iOS or save-data), skip heavy smoke effect
+	if (window.__cook14u_lowPowerMode) { console.info('Skipping green smoke for low-power device'); return; }
 	let camera, scene, renderer, clock, smokeParticles = [], smokeMaterial;
 	const overlay = document.querySelector('.home-overlay');
 	const photoBg = overlay ? overlay.querySelector('.home-photo-bg') : null;
@@ -240,7 +267,7 @@ ensureThree(function initGreenSmoke() {
 	smokeMaterial = new THREE.MeshLambertMaterial({ map: smokeTextureLocal, transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.NormalBlending, color: new THREE.Color(0x009b27) });
 	try { const loader = new THREE.TextureLoader(); loader.setCrossOrigin('anonymous'); loader.load(SMOKE_IMG_URL, function(tex) { tex.needsUpdate = true; smokeMaterial.map = tex; smokeMaterial.needsUpdate = true; console.log('Smoke texture loaded from CodePen URL'); }, undefined, function(err) { console.warn('Failed to load external smoke image, using fallback texture', err); }); } catch (err) { console.warn('TextureLoader not available or failed, using local smoke texture', err); }
 	const smokeGeo = new THREE.PlaneGeometry(300, 300);
-	const PARTICLE_COUNT = 90;
+	const PARTICLE_COUNT = window.__cook14u_lowPowerMode ? 18 : 90;
 	const w = overlay.clientWidth || window.innerWidth;
 	const h = overlay.clientHeight || window.innerHeight;
 	// tighten radii and margins so smoke stays well within the visible area
@@ -371,6 +398,25 @@ ensureThree(function initGreenSmoke() {
 		}
 	}
 
+	// Lazy-load the hero/background YouTube iframe when it enters the viewport
+	(function lazyLoadHeroIframe(){
+		const hero = document.getElementById('youtube-video');
+		if (!hero || !hero.dataset || !hero.dataset.src) return;
+		// If low-power mode, do not auto-load background video (saves CPU/battery on iPhone7)
+		if (window.__cook14u_lowPowerMode) { console.info('Low-power: not auto-loading hero background video'); return; }
+		const obs = new IntersectionObserver(entries => {
+			entries.forEach(entry => {
+				if (!entry.isIntersecting) return;
+				if (!hero.dataset.loaded) {
+					hero.src = hero.dataset.src;
+					hero.dataset.loaded = '1';
+				}
+				obs.disconnect();
+			});
+		}, { root: null, threshold: 0.01 });
+		obs.observe(hero);
+	})();
+
 	// Small note: Twitch embeds often require a `parent` param matching the host; if the player doesn't load change the src or use Twitch widget per docs.
 })();
 
@@ -433,7 +479,7 @@ ensureThree(function initGreenSmoke() {
 		const linkBtn = document.getElementById('content-link-btn');
 		if (!linkWrap || !linkBtn) return;
 		if (!opt || !opt.classList.contains('active')) {
-			linkWrap.style.display = 'none';
+			linkWrap.classList.remove('visible');
 			linkWrap.setAttribute('aria-hidden', 'true');
 			return;
 		}
@@ -446,7 +492,7 @@ ensureThree(function initGreenSmoke() {
 		linkBtn.setAttribute('aria-label', `Open ${platformLabel}`);
 		linkBtn.title = `Open ${platformLabel}`;
 		linkBtn.setAttribute('data-platform', info.platform);
-		linkWrap.style.display = 'flex';
+		linkWrap.classList.add('visible');
 		linkWrap.setAttribute('aria-hidden', 'false');
 	}
 
@@ -519,9 +565,9 @@ ensureThree(function initGreenSmoke() {
 		updateContentLinkForOption(null);
 	});
 
-	// Ensure the initially active option has its embeds loaded
+	// Ensure the initially active option has its embeds loaded (skip auto-load on low-power to save bandwidth)
 	const initial = document.querySelector('.option.active');
-	if (initial) loadEmbedsInOption(initial);
+	if (initial && !window.__cook14u_lowPowerMode) loadEmbedsInOption(initial);
 	if (initial) updateContentLinkForOption(initial);
 })();
 
@@ -764,8 +810,9 @@ function setupTestYouTubePlaylist(optionEl) {
 				const centerX = rect.left + rect.width / 2 - sectionRect.left;
 				const centerY = rect.top + rect.height / 2 - sectionRect.top;
     
-				// Create sparks around the card
-				for (let i = 0; i < 50; i++) {
+				// Create sparks around the card; reduce count on low-power devices
+				const sparks = window.__cook14u_lowPowerMode ? 16 : 50;
+				for (let i = 0; i < sparks; i++) {
 					const angle = (Math.random() * Math.PI * 2);
 					const distance = Math.random() * 40 + rect.width / 3;
 					const x = centerX + Math.cos(angle) * distance;
@@ -809,6 +856,7 @@ function setupTestYouTubePlaylist(optionEl) {
 	// Left-side lines shader initializer (moved from inline script in index.html)
 	function initLeftLines() {
 		try {
+			if (window.__cook14u_lowPowerMode) { console.info('Skipping left-side lines shader for low-power device'); return; }
 			if (typeof THREE === 'undefined') return; // require global THREE
 			const overlay = document.querySelector('.home-overlay');
 			if (!overlay) return;

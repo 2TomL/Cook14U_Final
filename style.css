@@ -279,8 +279,10 @@ html { scroll-behavior: smooth; }
 .live-indicator.is-live img { filter: drop-shadow(0 6px 10px rgba(255,50,50,0.35)); }
 
 /* Demo toggle button (temporary for visual testing) */
+
 .demo-toggle {
-	display: inline-flex;
+	/* hidden by default; JS reveals this temporary test control when needed */
+	display: none;
 	align-items: center;
 	justify-content: center;
 	margin-left: 8px;
@@ -1294,10 +1296,22 @@ padding: 0 1rem;
 /* Container for the dynamic platform link shown under content cards
    Default hidden; visibility is toggled via JS (sets inline style to 'flex') */
 .content-links {
-	display: none;
+	/* Reserve vertical space to avoid layout shifts when the dynamic platform link appears.
+	   Default is hidden (keeps its reserved height); add `.visible` to reveal. */
+	display: flex;
 	justify-content: center;
- 	margin-top: 12px;
- 	margin-bottom: 28px;
+	margin-top: 12px;
+	margin-bottom: 28px;
+	height: 56px; /* reserve expected button height */
+	align-items: center;
+	visibility: hidden;
+	opacity: 0;
+	transition: opacity 220ms ease, visibility 0ms linear 220ms;
+}
+.content-links.visible {
+	visibility: visible;
+	opacity: 1;
+	transition-delay: 0ms;
 }
 .content-link {
 	/* Match Warzone-style .wz-btn for consistent button appearance */
