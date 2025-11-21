@@ -1291,12 +1291,13 @@ padding: 0 1rem;
 }
 .insta-image .insta-post-link:hover { transform: translateY(-4px); box-shadow: 0 20px 44px rgba(0,0,0,0.7), 0 8px 26px rgba(255,80,80,0.08); }
 
-/* Container for the dynamic platform link shown under content cards */
+/* Container for the dynamic platform link shown under content cards
+   Default hidden; visibility is toggled via JS (sets inline style to 'flex') */
 .content-links {
-	display: flex;
+	display: none;
 	justify-content: center;
-	margin-top: 12px;
-	margin-bottom: 28px;
+ 	margin-top: 12px;
+ 	margin-bottom: 28px;
 }
 .content-link {
 	/* Match Warzone-style .wz-btn for consistent button appearance */
