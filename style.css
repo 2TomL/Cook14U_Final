@@ -1,0 +1,1638 @@
+.home-logo {
+	display: block;
+	 margin: 0;
+	 max-width: 160px;
+	 width: 16vw;
+	height: auto;
+	z-index: 2;
+	position: relative;
+	background: none;
+	box-shadow: none;
+	border: none;
+}
+@media (min-width: 1800px) {
+	.video-container {
+		top: 0vh;
+	}
+}
+@media (min-width: 1400px) {
+	.video-container {
+		top: 12vh;
+	}
+}
+
+@media (min-width: 701px) and (max-width: 1024px) {
+	.video-container {
+		top: 36vh; 
+	}
+}
+.home-photo-bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+	z-index: 0;
+}
+
+/* Smoke canvas placed over background photo but under text */
+.home-smoke-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* above the bg (z-index 0) but below text (z-index 2) */
+    pointer-events: none;
+}
+
+/* Left-side lines canvas (same stacking as smoke) */
+.home-lines-canvas {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1; /* over background photo but below main overlay text/logo */
+	pointer-events: none;
+}
+.home-photo-full {
+	width: 100vw;
+	height: 100vh;
+	object-fit: cover;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 0;
+}
+.home-overlay {
+	position: relative;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.home-text {
+	position: relative;
+	z-index: 2;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+.video-container {
+	position: absolute;
+	top: 19vh;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 44vw;
+	height: 24vw;
+	max-width: 1000px;
+	max-height: 560px;
+	min-width: 320px;
+	min-height: 180px;
+	overflow: hidden;
+	z-index: 0;
+	border-radius: 18px;
+	box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.video-bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	z-index: 0;
+}
+#youtube-video {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	pointer-events: none;
+	border-radius: 18px;
+}
+.home-bg {
+	position: relative;
+	overflow: hidden;
+}
+.home-overlay {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+}
+.home-photo {
+	display: block;
+	max-width: 600px;
+	width: 80vw;
+	height: auto;
+	margin: 0 auto 2rem auto;
+	border-radius: 16px;
+	box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+	position: relative;
+	z-index: 2;
+}
+.home-subtext {
+	color: #fff;
+	font-size: 1.3rem;
+	text-align: center;
+	margin-top: 1.2rem;
+	font-family: Arial, sans-serif;
+	font-weight: 400;
+	letter-spacing: 0.5px;
+}
+@font-face {
+	font-family: 'XBall';
+	src: url('assets/xball/XBall.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+:root {
+	--seahawks-blue: #0077a3; 
+	--seahawks-blue-rgb: 0,119,163; 
+	--navbar-height: 64px;
+}
+body {
+	margin: 0;
+	font-family: Arial, sans-serif;
+	background: #000;
+	color: #eee;
+    padding-top: 64px;
+}
+
+/* ensure anchor targets are visible below fixed navbar */
+html { scroll-behavior: smooth; }
+.section, .wz-frame { scroll-margin-top: calc(var(--navbar-height) + 12px); }
+
+/* Navbar basis */
+.navbar {
+	background: linear-gradient(120deg, #000 0%, #111 80%, #009b27 100%);
+	padding: 0.5rem 0;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: 1000;
+	/* iets fellere, maar minder brede Seahawks-blue glow */
+	box-shadow: 0 6px 18px rgba(var(--seahawks-blue-rgb),0.26),
+		0 0 12px rgba(var(--seahawks-blue-rgb),0.14);
+	transition: box-shadow 0.20s ease, transform 0.20s ease;
+}
+
+.navbar::after {
+	content: "";
+	position: absolute;
+	left: 10%;
+	right: 10%;
+	bottom: -6px;
+	height: 10px;
+	pointer-events: none;
+	background: radial-gradient(circle at 50% 0, rgba(var(--seahawks-blue-rgb),0.46), rgba(var(--seahawks-blue-rgb),0.14) 36%, transparent 70%);
+	filter: blur(6px);
+	z-index: 999;
+}
+
+.navbar:hover {
+	box-shadow: 0 8px 26px rgba(var(--seahawks-blue-rgb),0.30), 0 0 18px rgba(var(--seahawks-blue-rgb),0.18);
+}
+.navbar-content {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 0 1rem;
+}
+.navbar-logo img {
+	height: 40px;
+	width: 40px;
+	object-fit: cover;
+	border-radius: 50%;
+	box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.navbar-links {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0;
+	padding: 0;
+	justify-content: flex-end;
+	gap: 0.1rem;
+	margin-right: 1.5rem;
+}
+.navbar-links li {
+	margin: 0;
+}
+.navbar-links a {
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+	font-family: 'XBall', Arial, sans-serif;
+	padding: 0.5rem 1rem;
+	border-radius: 4px;
+	transition: background 0.2s;
+}
+.section-title {
+	font-family: 'XBall', Arial, sans-serif;
+	font-size: 2.5rem;
+	color: #fff;
+	margin-bottom: 1.5rem;
+	text-align: center;
+	text-shadow:
+		0 1px 0 #00b0f0, /* Seahawks blauw lichte bovenrand */
+		0 2px 2px #003366, /* subtiele blauwe schaduw onder */
+		1px 1px 0 #00b0f0, /* lichte outline rechts onder */
+		-1px -1px 0 #00b0f0; /* lichte outline links boven */
+}
+
+.green-14 {
+	color: #009b27;
+}
+
+.home-bg .section-title {
+	margin-top: 60vh;
+}
+.navbar-links a:hover {
+	background: #444;
+}
+
+.section {
+	margin-bottom: 2rem;
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.home-bg {
+	/* ...bestaande code... */
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.hamburger-menu {
+	display: none;
+	flex-direction: column;
+	justify-content: space-around;
+	width: 30px;
+	height: 25px;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	z-index: 1001;
+}
+
+.hamburger-menu span {
+	width: 100%;
+	height: 3px;
+	background: #fff;
+	border-radius: 3px;
+	transition: all 0.3s ease;
+}
+
+.hamburger-menu.is-active span:nth-child(1) {
+	transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger-menu.is-active span:nth-child(2) {
+	opacity: 0;
+}
+
+.hamburger-menu.is-active span:nth-child(3) {
+	transform: rotate(-45deg) translate(8px, -8px);
+}
+
+@media (max-width: 700px) {
+	.hamburger-menu {
+		display: flex;
+	}
+	
+	.navbar-content {
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+	}
+	
+	.navbar-links {
+		position: fixed;
+		top: -100vh;
+		left: 0;
+		width: 100%;
+		height: calc(100vh - 64px);
+		background: linear-gradient(120deg, #000 0%, #111 80%, #009b27 100%);
+		flex-direction: column;
+		align-items: center;
+		justify-content: flex-start;
+		padding-top: 2rem;
+		transition: top 0.3s ease;
+		margin-right: 0;
+	}
+	
+	.navbar-links.active {
+		top: 64px;
+		box-shadow: 0 10px 30px rgba(var(--seahawks-blue-rgb),0.12) inset, 0 6px 18px rgba(var(--seahawks-blue-rgb),0.06);
+		border-top: 1px solid rgba(var(--seahawks-blue-rgb),0.04);
+	}
+	
+	.navbar-links li {
+		margin: 1rem 0;
+	}
+	
+	.navbar-links a {
+		font-size: 1.5rem;
+	}
+	
+	.video-container,
+	.home-photo-bg {
+		display: none;
+	}
+	
+	.home-bg .section-title {
+		margin-top: 0;
+	}
+	
+	.logo-fire-container {
+		position: relative !important;
+		top: auto !important;
+		left: auto !important;
+		transform: none !important;
+		margin-top: 8vh;
+		margin-bottom: 4vh;
+	}
+	
+	.home-logo {
+		max-width: 200px;
+		width: 45vw;
+	}
+	
+	.fire-effect-container {
+		width: 200px;
+		height: 200px;
+	}
+	
+	.home-overlay {
+		padding-top: 10vh;
+		flex-direction: column;
+		justify-content: flex-start;
+	}
+	
+	main {
+		margin: 1rem;
+		padding: 0.5rem;
+	}
+}
+
+.logo-fire-container {
+  position: absolute;
+  top: 1vh;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: fit-content;
+  z-index: 100;
+}
+
+.fire-effect-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px;
+  height: 180px;
+  z-index: 110;
+  pointer-events: none;
+}
+
+#fireCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 110;
+}
+
+.logo-fire-container .home-logo {
+  position: relative;
+  z-index: 120;
+}
+
+/* Warzone-style About section */
+.wz-about {
+	display: flex;
+	flex-direction: column; /* stack title above frame */
+	align-items: center;
+	padding: 4rem 1rem;
+	background: transparent;
+}
+.wz-frame {
+	width: min(1100px, 94%);
+	background-image: url('assets/aboutBackG_custom.png'), url('assets/aboutBackG.png');
+	background-size: cover;
+	background-position: center;
+	border-radius: 14px;
+	padding: 40px;
+	box-shadow: 0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+	position: relative; /* allow absolute children to position relative to frame */
+	overflow: visible;
+	z-index: 50;
+}
+.wz-frame-title {
+	/* match other section titles */
+	font-family: 'XBall', Arial, sans-serif;
+	font-size: 2.5rem;
+	color: #fff;
+	margin: 0 0 12px 0;
+	text-align: center;
+	letter-spacing: 0.5px;
+}
+.about-inner {
+	display: flex;
+	gap: 24px;
+	align-items: center;
+}
+.about-left img {
+	width: 420px;
+	max-width: 36vw;
+	height: auto;
+	display: block;
+	border-radius: 8px;
+	box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+	border: 6px solid rgba(0,0,0,0.45);
+}
+.about-right {
+	color: #e9f7fb;
+	font-size: 1.05rem;
+	line-height: 1.5;
+	max-width: 52%;
+}
+.about-right p {
+	margin: 0 0 1.25rem 0;
+}
+
+/* About paragraph card styled like the COD button (dark panel with seahawks-blue border and subtle glow) */
+.about-card {
+	background: linear-gradient(180deg, #0f1315, #050607);
+	color: #dcefff;
+	padding: 18px 18px 18px 22px;
+	border-radius: 8px;
+	border: 1px solid rgba(var(--seahawks-blue-rgb), 0.12);
+	box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 12px 30px rgba(0,0,0,0.6), 0 0 18px rgba(var(--seahawks-blue-rgb), 0.04);
+	position: relative;
+}
+.about-card p { margin: 0; color: #e8f7ff; line-height: 1.6; }
+.about-card::before {
+	/* small rectangular accent similar to the button's left block */
+	content: '';
+	position: absolute;
+	left: 12px;
+	top: 12px;
+	width: 10px;
+	height: 26px;
+	border-radius: 2px;
+	background: linear-gradient(180deg, rgba(var(--seahawks-blue-rgb),0.95), rgba(var(--seahawks-blue-rgb),0.6));
+	box-shadow: 0 0 8px rgba(var(--seahawks-blue-rgb), 0.45);
+}
+
+@media (max-width: 900px) {
+	.about-card { padding: 14px; border-radius: 6px; }
+}
+
+/* Ensure setup modal content doesn't overflow on small screens */
+@media (max-width: 900px) {
+	.wz-modal-content, .modal-content {
+		box-sizing: border-box;
+		padding: 1rem;
+		overflow-x: hidden; /* prevent text from sticking out horizontally */
+	}
+
+	/* make the specs flow in document order and constrain their width */
+	.setup-card.setup-around .specs,
+	.setup-card.setup-around .specs-left,
+	.setup-card.setup-around .specs-right {
+		position: relative !important;
+		width: 100% !important;
+		max-width: 100% !important;
+		left: auto !important;
+		right: auto !important;
+		transform: none !important;
+		padding: 0.5rem 0 !important;
+		text-align: center;
+		box-sizing: border-box;
+	}
+
+	/* ensure the media block centers and doesn't push outside */
+	.setup-card.setup-around .media {
+		position: relative !important;
+		left: 50% !important;
+		transform: translateX(-50%) !important;
+		top: 0 !important;
+		width: 80% !important;
+		max-width: 360px !important;
+		height: auto !important;
+	}
+}
+
+/* Warzone / Call-of-Duty style button (when placed inside the frame it anchors bottom-right) */
+.wz-btn {
+	--wz-accent: #00c0ff;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	background: linear-gradient(180deg, #0f1315, #050607);
+	color: #dcefff;
+	font-weight: 800;
+	letter-spacing: 1.6px;
+	padding: 10px 14px;
+	border-radius: 6px;
+	border: 1px solid rgba(var(--seahawks-blue-rgb), 0.14);
+	box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 8px 20px rgba(0,0,0,0.6);
+	cursor: pointer;
+	position: relative;
+	text-transform: uppercase;
+	font-size: 0.85rem;
+}
+.wz-frame .wz-btn {
+	position: absolute;
+	right: 18px;
+	bottom: 28px;
+	z-index: 60;
+}
+.wz-btn::before {
+	content: '';
+	position: absolute;
+	left: 6px;
+	top: 6px;
+	width: 10px;
+	height: 10px;
+	border-radius: 2px;
+	background: linear-gradient(180deg, rgba(var(--seahawks-blue-rgb),0.95), rgba(var(--seahawks-blue-rgb),0.6));
+	box-shadow: 0 0 8px rgba(var(--seahawks-blue-rgb), 0.6);
+}
+.wz-btn:hover {
+	transform: translateY(-2px);
+	box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 28px rgba(var(--seahawks-blue-rgb), 0.12);
+}
+.wz-btn:active { transform: translateY(0); }
+
+/* Modal / popup for setup */
+.wz-modal {
+	position: fixed;
+	inset: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0,0,0,0.65);
+	z-index: 2000;
+	padding: 2rem;
+}
+.wz-modal.open { display: flex; }
+.wz-modal-content {
+	width: min(920px, 96%);
+	/* glass effect - increased transparency */
+	background: rgba(255,255,255,0.012);
+	-webkit-backdrop-filter: blur(8px) saturate(120%);
+	backdrop-filter: blur(8px) saturate(120%);
+	border-radius: 10px;
+	padding: 0.85rem; /* reduced padding to make content more compact */
+	/* slightly thicker Seahawks-blue translucent border for stronger frame */
+	border: 2px solid rgba(var(--seahawks-blue-rgb), 0.18);
+	/* depth shadow + slightly stronger blue glow */
+	box-shadow: 0 20px 60px rgba(0,0,0,0.56), 0 0 38px rgba(var(--seahawks-blue-rgb), 0.10), inset 0 1px 0 rgba(255,255,255,0.01);
+	color: rgba(230,251,255,0.92);
+	/* ensure this content receives pointer events and sits above the modal backdrop */
+	pointer-events: auto;
+	z-index: 2010;
+}
+.wz-modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+.wz-modal-header h3 { margin: 0; }
+.wz-modal .close-btn {
+	background: transparent;
+	border: none;
+	color: #fff;
+	font-size: 1.1rem;
+	cursor: pointer;
+}
+.wz-modal-header h3 {
+	/* deeper engraved title style */
+	color: rgba(190,220,230,0.95);
+	font-weight: 900;
+	/* darker inset + sharper highlight for deeper engraving */
+	-webkit-text-stroke: 0.8px rgba(0,0,0,0.7);
+	text-shadow:
+		0 1px 0 rgba(255,255,255,0.08), /* tiny highlight */
+		0 3px 8px rgba(0,0,0,0.82),     /* deep shadow */
+		0 -2px 1px rgba(255,255,255,0.06); /* subtle top choke */
+	letter-spacing: 0.6px;
+	line-height: 1.05;
+}
+.setup-card {
+	display: grid;
+	grid-template-columns: 240px 1fr; /* slightly narrower media column */
+	gap: 0.75rem;
+	align-items: start;
+}
+.setup-card .media img {
+	width: 100%;
+	height: auto;
+	border-radius: 6px;
+	background: linear-gradient(180deg, rgba(0,0,0,0.14), rgba(0,0,0,0.10));
+	border: 3px solid rgba(255,255,255,0.04);
+	box-shadow: 0 10px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.02);
+}
+.setup-card ul {
+	margin: 0;
+	padding-left: 1rem;
+}
+.setup-card li { margin-bottom: 0.6rem; }
+
+/* Centered PC image with specs arranged around it */
+.setup-card.setup-around {
+    position: relative;
+    width: 100%;
+    min-height: 380px; /* reduced min height to avoid internal scrolling */
+    display: block;
+}
+.setup-card.setup-around .media {
+    /* make the PC image sticky within the modal so it stays visible while modal content scrolls */
+    position: sticky;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 260px; /* slightly smaller so specs can fit without scrolling */
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+.setup-card.setup-around .media img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	border-radius: 8px;
+	box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+}
+
+/* CSS fallback/guaranteed glitch effect for the setup image.
+   Uses background layers and pseudo-elements to emulate RGB split + jitter.
+   Applied when the .media element has the .glitch class (toggled via JS).
+*/
+.setup-card.setup-around .media {
+	position: relative;
+	background-size: cover;
+	background-position: center;
+}
+.setup-card.setup-around .media img { opacity: 0; /* keep HTML img for a11y but hide visual */ }
+
+.setup-card.setup-around .media.glitch::before,
+.setup-card.setup-around .media.glitch::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-image: inherit; /* inherit background-image from .media */
+	background-size: cover;
+	background-position: center;
+	mix-blend-mode: screen;
+	pointer-events: none;
+	border-radius: 8px;
+}
+.setup-card.setup-around .media.glitch::before {
+	transform: translate3d(-6px,-2px,0);
+	clip-path: polygon(0 0, 100% 0, 100% 33%, 0 25%);
+	opacity: 0.85;
+	filter: hue-rotate(-10deg) saturate(120%);
+}
+.setup-card.setup-around .media.glitch::after {
+	transform: translate3d(6px,2px,0);
+	clip-path: polygon(0 66%, 100% 58%, 100% 100%, 0 100%);
+	opacity: 0.85;
+	filter: hue-rotate(10deg) saturate(110%);
+}
+
+@keyframes glitch-jitter {
+	0% { transform: translate3d(0,0,0); }
+	20% { transform: translate3d(-2px,-1px,0); }
+	40% { transform: translate3d(2px,1px,0); }
+	60% { transform: translate3d(-3px,2px,0); }
+	80% { transform: translate3d(1px,-2px,0); }
+	100% { transform: translate3d(0,0,0); }
+}
+.setup-card.setup-around .media.glitch::before,
+.setup-card.setup-around .media.glitch::after {
+	animation: glitch-jitter 800ms infinite linear;
+}
+
+.setup-card.setup-around .specs {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: calc(50% - 160px); /* allow for slightly smaller media column */
+    max-width: 320px;
+    z-index: 5;
+}
+.setup-card.setup-around .specs-left { left: 4%; }
+.setup-card.setup-around .specs-right { right: 4%; text-align: right; }
+.setup-card.setup-around .specs ul {
+	padding-left: 0;
+	margin: 0;
+	list-style: none; /* remove bullets */
+}
+
+/* Make sure desktop right-column specs are right-aligned; mobile overrides keep left alignment */
+.setup-card.setup-around .specs-right ul { padding-right: 1rem; padding-left: 0; }
+.setup-card.setup-around .specs-right li { text-align: right; }
+.setup-card.setup-around .specs li {
+    font-size: 0.95rem; /* slightly smaller to compress content */
+    color: #ffffff;
+    margin-bottom: 1rem; /* reduced spacing */
+    line-height: 1.5;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+
+.setup-card.setup-around .specs li strong {
+	display: block; /* label on its own line */
+	font-weight: 900;
+	margin-bottom: 0.4rem;
+	color: rgba(160,200,210,0.95); /* engraved label color */
+	-webkit-text-stroke: 0.45px rgba(0,0,0,0.65);
+	text-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 5px 12px rgba(0,0,0,0.82);
+}
+
+@media (max-width: 900px) {
+	.setup-card.setup-around { min-height: auto; }
+	.setup-card.setup-around .media { position: relative; width: 80%; height: auto; transform: translate(-50%, 0); left: 50%; top: 30px; }
+	.setup-card.setup-around .specs { position: relative; width: 100%; transform: none; top: auto; left: auto; right: auto; padding: 1rem 0; }
+	.setup-card.setup-around .specs-left, .setup-card.setup-around .specs-right { text-align: left; }
+}
+
+@media (max-width: 900px) {
+	.about-inner { flex-direction: column; }
+	.about-left img { width: 80%; max-width: 360px; }
+	.about-right { max-width: 100%; }
+	.setup-card { grid-template-columns: 1fr; }
+}
+
+/* Right-side stacked tabs */
+.side-tabs {
+	position: fixed;
+	right: 0;
+	top: 35%;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	z-index: 1500;
+	transform: translateX(6px); /* slightly off-screen so they 'sit' on the edge */
+}
+.side-tab {
+	width: 56px;
+	height: 64px;
+	border-radius: 8px 0 0 8px;
+	overflow: hidden;
+	background: linear-gradient(180deg, #0c1012, #050607);
+	border: 1px solid rgba(var(--seahawks-blue-rgb), 0.12);
+	box-shadow: 0 8px 18px rgba(0,0,0,0.6), 0 0 10px rgba(var(--seahawks-blue-rgb), 0.04);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding-left: 6px;
+	cursor: pointer;
+	transform-origin: right center;
+}
+.side-tab img { width: 38px; height: 38px; object-fit: contain; display:block; }
+.side-tab:hover { transform: translateX(-6px); box-shadow: 0 10px 26px rgba(var(--seahawks-blue-rgb), 0.12); }
+
+@media (max-width: 900px) {
+	.side-tabs { display: none; }
+}
+
+/* App modal / iframe frames (keeps current side-tab buttons unchanged) */
+.wzmeta-logo-btn {
+	height: 32px;
+	width: auto;
+	display: block;
+	margin: 0 auto;
+}
+.wzmeta-iframe {
+	width: 100%;
+	height: 500px;
+	border-radius: 16px;
+	border: none;
+	background: rgba(0,0,0,0.1);
+	margin-top: 8px;
+	margin-bottom: 0;
+	box-shadow: 0 2px 12px rgba(225,177,44,0.15);
+}
+.codmunity-logo-btn {
+	height: 32px;
+	width: auto;
+	display: block;
+	margin: 0 auto;
+}
+.codmunity-iframe {
+	width: 100%;
+	height: 500px;
+	border-radius: 16px;
+	border: none;
+	background: rgba(0,0,0,0.1);
+	margin-top: 8px;
+	margin-bottom: 0;
+	box-shadow: 0 2px 12px rgba(105,179,231,0.15);
+}
+
+/* COD Tracker Modal (shared modal styling for the app popups) */
+.modal {
+	display: none;
+	position: fixed;
+	z-index: 3000;
+	left: 0;
+	top: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0,0,0,0.5);
+	-webkit-backdrop-filter: blur(4px);
+	backdrop-filter: blur(4px);
+	justify-content: center;
+	align-items: center;
+	transition: opacity 0.3s ease;
+}
+.modal.active { display: flex; opacity: 1; }
+.modal-content {
+	/* Match setup popup glass styling */
+	background: rgba(255,255,255,0.012);
+	-webkit-backdrop-filter: blur(8px) saturate(120%);
+	backdrop-filter: blur(8px) saturate(120%);
+	border-radius: 10px;
+	padding: 1.25rem;
+	position: relative;
+	min-width: 340px;
+	max-width: 640px;
+	width: 90vw;
+	max-height: 80vh;
+	overflow-y: auto;
+	/* Seahawks-blue translucent border and stronger glow like setup popup */
+	border: 2px solid rgba(var(--seahawks-blue-rgb), 0.18);
+	box-shadow: 0 20px 60px rgba(0,0,0,0.56), 0 0 38px rgba(var(--seahawks-blue-rgb), 0.10), inset 0 1px 0 rgba(255,255,255,0.01);
+	color: rgba(230,251,255,0.92);
+	/* ensure the modal content can receive clicks (backdrop sits behind) */
+	pointer-events: auto;
+	z-index: 3010;
+}
+
+/* Explicitly allow pointer events on embedded iframes inside modal content
+   Some complex CSS stacks or pseudo-elements can accidentally intercept
+   pointer events — make sure the iframe itself can receive them. */
+.modal-content iframe,
+.wz-modal-content iframe,
+.modal iframe {
+    pointer-events: auto;
+}
+.close-modal {
+	position: absolute;
+	top: 18px;
+	right: 18px;
+	font-size: 1.6rem;
+	color: #69b3e7;
+	background: rgba(105,179,231,0.15);
+	border: none;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+.close-modal:hover { background: rgba(105,179,231,0.35); color: #fff; }
+.modal-content h2 { 
+	/* match the deep engraved style from the setup modal title */
+	color: rgba(190,220,230,0.95);
+	font-weight: 900;
+	-webkit-text-stroke: 0.8px rgba(0,0,0,0.7);
+	text-shadow:
+		0 1px 0 rgba(255,255,255,0.08),
+		0 3px 8px rgba(0,0,0,0.82),
+		0 -2px 1px rgba(255,255,255,0.06);
+	letter-spacing: 0.6px;
+	line-height: 1.05;
+	margin-top: 0;
+	margin-bottom: 18px;
+	text-align: center;
+	font-size: 1.6em;
+	font-family: 'XBall', Arial, sans-serif;
+}
+.codtracker-iframe {
+	width: 100%;
+	height: 500px;
+	border-radius: 16px;
+	border: none;
+	background: rgba(0,0,0,0.1);
+	margin-top: 8px;
+	margin-bottom: 0;
+	box-shadow: 0 2px 12px rgba(105,179,231,0.15);
+}
+
+/* Content frames grid (CodePen-like framed style) */
+.content-grid {
+	display: grid;
+grid-template-columns: repeat(2, minmax(280px, 1fr));
+gap: 18px;
+max-width: 1100px;
+margin: 0 auto 4rem auto;
+padding: 0 1rem;
+}
+
+/* Community frame styling (matches content-frame look) */
+.community-inner { width: 100%; max-width: 1100px; margin: 0 auto 2.5rem auto; padding: 0 1rem; }
+.community-frame {
+	/* ensure the inner frame keeps the glass overlay but no background image (image sits behind in .wz-frame) */
+	width: 100%;
+	box-sizing: border-box;
+	background: rgba(255,255,255,0.012);
+	-webkit-backdrop-filter: blur(8px) saturate(120%);
+	backdrop-filter: blur(8px) saturate(120%);
+	border-radius: 12px;
+	padding: 12px;
+	border: 1px solid rgba(255,255,255,0.02);
+	box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 14px rgba(var(--seahawks-blue-rgb),0.06);
+	color: rgba(230,251,255,0.92);
+}
+
+/* Place the community background image on the outer .wz-frame for the Community section
+   so the image appears behind the frame (the 'kader erachter') */
+#community .wz-frame {
+	/* use Verdansk image as requested */
+	background-image: url('assets/verdansk-best-maps-of-all-time-scaled.jpeg');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.community-frame .frame-header { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.community-frame .frame-header h3 {
+	margin: 0;
+	/* engraved/deep title like other Warzone frames */
+	color: rgba(190,220,230,0.95);
+	font-weight: 900;
+	-webkit-text-stroke: 0.8px rgba(0,0,0,0.7);
+	text-shadow:
+		0 1px 0 rgba(255,255,255,0.08),
+		0 3px 8px rgba(0,0,0,0.82),
+		0 -2px 1px rgba(255,255,255,0.06);
+	letter-spacing: 0.6px;
+	line-height: 1.05;
+	font-family: 'XBall', Arial, sans-serif;
+}
+.community-frame .frame-body { padding-top:8px; }
+.discord-embed-wrap { width:100%; border-radius:10px; overflow:hidden; background:rgba(0,0,0,0.06); border: 1px solid rgba(var(--seahawks-blue-rgb), 0.06); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02); }
+.discord-embed { width:100%; height:420px; border:0; display:block; background: #000; }
+
+.community-frame::before {
+	/* outer decorative stroke like other content frames */
+	content: '';
+	position: absolute;
+	inset: 8px;
+	border-radius: 10px;
+	border: 2px solid rgba(var(--seahawks-blue-rgb),0.12);
+	box-shadow: 0 8px 20px rgba(0,0,0,0.55) inset;
+	pointer-events: none;
+}
+
+.community-frame::after {
+	content: '';
+	position: absolute;
+	width: 56px;
+	height: 34px;
+	right: 12px;
+	top: 12px;
+	border-radius: 6px;
+	background: linear-gradient(180deg, rgba(var(--seahawks-blue-rgb),0.16), rgba(255,255,255,0.02));
+	transform: skew(-12deg);
+	opacity: 0.9;
+	pointer-events: none;
+}
+
+@media (max-width: 900px) {
+	/* increase discord embed height on mobile for better visibility; use viewport-relative size so it's prominent */
+	.community-frame .discord-embed { height: 560px; max-height: 760px; }
+	/* prefer a taller, near-full area on narrow devices so the widget is usable */
+	.community-frame .discord-embed.full-mobile-height {
+		height: calc(100vh - 220px);
+		max-height: none;
+	}
+}
+
+/* For very small phones make the discord embed take most of the viewport height */
+@media (max-width: 420px) {
+	.community-frame .discord-embed { height: calc(100vh - 160px); }
+}
+
+/* Center the Content title + options like the About section */
+.content-inner {
+	width: 100%;
+	margin: 0 0 2rem 0;
+	padding: 0 1rem;
+	text-align: center; /* center the title text only */
+}
+
+/* ensure content section is a positioned container for the spark canvas */
+#content { position: relative; }
+
+/* spark canvas overlays content; pointer-events none so it doesn't block clicks */
+.content-spark-canvas {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 2500; /* above content but below modals */
+	pointer-events: none;
+}
+.content-inner .section-title {
+	margin: 1.25rem auto 2rem auto; /* move title slightly up and further from the cards */
+	max-width: 1100px; /* don't constrain the cards, only constrain the title width for long titles */
+}
+.content-frame {
+	position: relative;
+	background: linear-gradient(180deg, rgba(15,18,20,0.55), rgba(6,8,10,0.45));
+	border-radius: 12px;
+	padding: 12px;
+	box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 14px rgba(var(--seahawks-blue-rgb),0.06);
+	border: 1px solid rgba(255,255,255,0.02);
+	overflow: hidden;
+}
+.content-frame::before,
+.content-frame::after {
+	content: '';
+	position: absolute;
+	pointer-events: none;
+}
+/* outer decorative stroke */
+.content-frame::before {
+	inset: 6px;
+	border-radius: 10px;
+	border: 2px solid rgba(var(--seahawks-blue-rgb),0.12);
+	box-shadow: 0 8px 20px rgba(0,0,0,0.55) inset;
+}
+/* subtle corner accent */
+.content-frame::after {
+	width: 60px;
+	height: 38px;
+	right: 10px;
+	top: 10px;
+	border-radius: 6px;
+	background: linear-gradient(180deg, rgba(var(--seahawks-blue-rgb),0.16), rgba(255,255,255,0.02));
+	transform: skew(-12deg);
+	opacity: 0.9;
+}
+.frame-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 8px;
+	position: relative;
+	z-index: 3;
+}
+.frame-header h3 {
+	margin: 0;
+	font-family: 'XBall', Arial, sans-serif;
+	font-size: 1.1rem;
+	color: #eaf8ff;
+	letter-spacing: 0.6px;
+	text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+.frame-badge {
+	display: inline-block;
+	font-size: 0.75rem;
+	padding: 4px 8px;
+	border-radius: 6px;
+	background: rgba(var(--seahawks-blue-rgb),0.12);
+	color: rgba(230,251,255,0.95);
+	font-weight: 700;
+	border: 1px solid rgba(var(--seahawks-blue-rgb),0.18);
+}
+.frame-body {
+	position: relative;
+	z-index: 2;
+	background: linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.16));
+	border-radius: 8px;
+	padding: 10px;
+	min-height: 220px;
+}
+.embed-iframe {
+	width: 100%;
+	/* prefer aspect-ratio when supported so iframes scale naturally */
+	aspect-ratio: 16 / 9;
+	height: auto;
+	border: none;
+	border-radius: 8px;
+	box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+	background: #000;
+}
+
+/* Instagram slideshow */
+.insta-slideshow { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.insta-image { width: 100%; aspect-ratio: 16 / 9; height: auto; background-size: cover; background-position: center; border-radius: 8px; transition: opacity 0.45s ease, transform 0.45s ease; }
+.insta-controls { position: absolute; right: 12px; bottom: 12px; display: flex; gap: 8px; z-index: 4; }
+.insta-controls button { background: rgba(0,0,0,0.32); color: #fff; border: 1px solid rgba(255,255,255,0.04); padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.insta-controls button:hover { background: rgba(0,0,0,0.5); }
+
+@media (max-width: 900px) {
+	.content-grid { grid-template-columns: 1fr; }
+	.embed-iframe, .insta-image { aspect-ratio: 16 / 9; height: auto; }
+}
+
+/* Mobile / small-tablet fixes: center About and make modals fully responsive */
+@media (max-width: 900px) {
+	.about-inner { flex-direction: column; align-items: center; text-align: center; padding: 0 1rem; }
+	.about-right { max-width: 100%; text-align: center; }
+	.about-left { margin-bottom: 1rem; }
+	.about-left img { width: 80%; max-width: 360px; margin: 0 auto; display: block; }
+	.about-right, .about-left, .about-card { width: 100%; }
+	.setup-card.setup-around .media { position: relative; left: 50%; transform: translate(-50%, 0); top: 0; width: 80%; height: auto; }
+
+	/* Make the about frame slightly narrower on mobile so there's a small 3-5px gap at the sides */
+	.wz-frame {
+		width: calc(100% - 8px); /* 4px gap each side */
+		margin: 0 4px;
+		box-sizing: border-box;
+	}
+
+	/* Ensure the image doesn't overflow the narrowed frame */
+	.wz-frame .about-left img {
+		width: 100%;
+		max-width: 100%;
+		height: auto;
+	}
+
+	/* Move the SHOW SETUP button lower on mobile so it doesn't sit too close to the frame edge */
+	.wz-frame .wz-btn {
+		position: relative !important;
+		right: auto !important;
+		bottom: auto !important;
+		left: 50%;
+		transform: translateX(-50%);
+		margin-top: 1.25rem; /* slightly higher than before */
+	}
+
+	/* Ensure setup specs in right column are left-aligned on small screens */
+	.setup-card.setup-around .specs-right,
+	.setup-card.setup-around .specs-right ul,
+	.setup-card.setup-around .specs-right li {
+		text-align: left !important;
+		padding-right: 0 !important;
+	}
+
+	/* Make modal/app frames fill the available viewport on small devices */
+	.modal-content, .wz-modal-content {
+		/* make modal take full width of viewport on small screens */
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		margin: 0;
+		padding: 12px;
+		box-sizing: border-box;
+		max-height: 92vh;
+		border-radius: 10px;
+	}
+
+	/* Ensure embedded app iframes scale on mobile */
+	.wzmeta-iframe, .codtracker-iframe, .codmunity-iframe, .embed-iframe {
+		width: 100% !important;
+		max-width: 100% !important;
+		height: auto !important;
+		aspect-ratio: 16 / 9;
+		display: block;
+		box-sizing: border-box;
+	}
+
+	/* ensure modal wrapper doesn't add extra horizontal space */
+	.modal { padding: 0; }
+}
+
+/* Make WZ app modal iframes much taller on mobile for better usability */
+@media (max-width: 900px) {
+	.wzmeta-iframe,
+	.codtracker-iframe,
+	.codmunity-iframe {
+		/* use a lower fixed height on mobile so modals do not appear too tall */
+		height: 420px !important;
+		max-height: 520px !important;
+	}
+}
+
+@media (max-width: 420px) {
+	.wzmeta-iframe,
+	.codtracker-iframe,
+	.codmunity-iframe {
+		height: 380px !important;
+		max-height: 460px !important;
+	}
+}
+
+@media (max-width: 480px) {
+	.embed-iframe, .insta-image { aspect-ratio: 16 / 9; height: auto; }
+}
+
+/* Site footer styling */
+.site-footer {
+	width: 100%;
+	background: transparent;
+	padding: 16px 12px;
+	box-sizing: border-box;
+	text-align: center;
+	color: rgba(200,230,240,0.9);
+	font-size: 0.95rem;
+	margin-top: 24px;
+}
+.site-footer .footer-inner { max-width: 1100px; margin: 0 auto; }
+.site-footer .footer-link {
+	color: rgba(var(--seahawks-blue-rgb), 1);
+	font-weight: 800;
+	text-decoration: none;
+	padding: 0 4px;
+}
+.site-footer .footer-link:hover,
+.site-footer .footer-link:focus {
+	text-decoration: underline;
+	outline: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.site-footer .footer-link { transition: color 160ms ease, transform 160ms ease; }
+	.site-footer .footer-link:hover { transform: translateY(-1px); }
+}
+
+/* When a single option is opened we hide the other closed cards to focus */
+.options.single-open .option:not(.active) {
+	display: none;
+}
+
+/* Close button inside each option panel */
+.option-close {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 12;
+	background: rgba(0,0,0,0.45);
+	color: #fff;
+	border: none;
+	width: 36px;
+	height: 36px;
+	border-radius: 8px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+	font-size: 18px;
+}
+.option-close:hover { background: rgba(0,0,0,0.65); }
+
+
+/* Tablet-specific adjustments (<= 1024px) */
+@media (max-width: 1024px) {
+	.options { height: 360px; gap: 8px; }
+	.option.active { max-width: none; }
+	/* slightly larger icons for tablet but still balanced */
+	.option .icon { min-width: 76px; max-width: 76px; height: 76px; }
+	.option .icon .option-icon { width: 56px; height: 56px; }
+}
+
+/* Touch targets: ensure buttons are comfortably tappable on small devices */
+@media (hover: none) and (pointer: coarse) {
+	.yt-controls button, .insta-controls button, .side-tab { min-width: 44px; min-height: 44px; }
+}
+
+/* Options (CodePen-like) layout and behavior */
+.options {
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	overflow: hidden;
+	min-width: 600px;
+	max-width: 900px;
+	width: calc(100% - 100px);
+	height: 400px;
+	margin: 0 auto 3rem auto;
+	gap: 10px;
+}
+.option {
+	position: relative;
+	overflow: hidden;
+	min-width: 60px;
+	margin: 10px;
+	background: var(--optionBackground, var(--defaultBackground, #E6E9ED));
+	background-size: auto 120%;
+	background-position: center;
+	cursor: pointer;
+	transition: .5s cubic-bezier(0.05, 0.61, 0.41, 0.95);
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 0%;
+	border-radius: 18px; /* match opened cards */
+}
+.option.active {
+	flex: 8 1 0%;
+	transform: scale(1);
+	max-width: 600px;
+	margin: 0;
+	/* minder afgeronde hoeken wanneer geopend */
+	border-radius: 18px; /* slightly rounder as requested */
+	background-size: auto 100%;
+}
+.option .shadow {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 0; /* no overlay on closed cards so background reaches the edge */
+	transition: .5s cubic-bezier(0.05, 0.61, 0.41, 0.95);
+	box-shadow: none;
+}
+.option.active .shadow {
+	height: 120px;
+	box-shadow: inset 0 -120px 120px -120px rgba(0,0,0,0.6), inset 0 -120px 120px -100px rgba(0,0,0,0.5);
+}
+.label {
+	display: flex;
+	position: absolute;
+	bottom: 10px;
+	height: 96px; /* increased label height to match larger icons */
+	transition: .45s cubic-bezier(0.05, 0.61, 0.41, 0.95);
+	z-index: 3;
+	padding: 8px 12px;
+	box-sizing: border-box;
+	max-width: calc(100% - 20px);
+}
+.option .icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 96px; /* keep container width so tab spacing remains */
+	max-width: 96px;
+	height: 96px;
+	padding: 0; /* no inner circle padding — icon itself is the button */
+	border-radius: 0; /* remove circular container */
+	background: transparent; /* remove circle background */
+	box-shadow: none; /* remove glow/shadow */
+	flex-shrink: 0;
+	overflow: visible;
+}
+.option .icon .option-icon {
+	width: 72px; /* fixed square so all icons visually match */
+	height: 72px;
+	object-fit: contain; /* don't crop top/bottom; keep full icon visible */
+	display: block;
+	border-radius: 0; /* icon image itself is the button (no extra rounded bg) */
+	cursor: pointer;
+	line-height: 0; /* avoid descender whitespace in some images */
+	max-width: 100%;
+	max-height: 100%;
+}
+.option .icon .option-icon:hover { transform: scale(1.06); }
+.info { display:flex; flex-direction:column; justify-content:center; margin-left:12px; color:white; white-space:pre; }
+.info >div { position: relative; transition: .45s cubic-bezier(0.05, 0.61, 0.41, 0.95), opacity .4s ease-out; }
+.info .main { font-weight: bold; font-size: 1.05rem; }
+.option:not(.active) .label {
+	bottom: 5px; /* move label (and icon) 5px up so it's not touching the edge */
+	left: 50%;
+	/* slightly larger nudge left for icons */
+	transform: translateX(calc(-50% - 34px));
+}
+.option:not(.active) .label { overflow: visible; }
+.option:not(.active) .info { display: none; }
+.option:not(.active) .info >div { left: 20px; opacity: 0; }
+.option.active .label {
+	bottom: 20px;
+	left: 20px;
+	transform: none;
+}
+.option.active .info >div { left: 0px; opacity: 1; }
+.panel { display: none; padding: 8px; z-index: 2; border-radius: 10px; overflow: hidden; }
+.option.active .panel { display: block; }
+
+/* YouTube small prev/next controls inside panel */
+.yt-controls {
+	position: absolute;
+	right: 12px;
+	bottom: 12px;
+	display: flex;
+	gap: 8px;
+	z-index: 6;
+}
+.yt-controls button {
+	width: 36px;
+	height: 36px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	background: rgba(0,0,0,0.45);
+	color: #fff;
+	border: 1px solid rgba(255,255,255,0.06);
+	cursor: pointer;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.yt-controls button:hover { background: rgba(0,0,0,0.6); }
+
+
+/* per-option background images (move inline styles into CSS to satisfy lint) */
+.option[data-type="twitch"] { background-image: url('assets/card5.png'); background-size: cover; background-position: center; background-repeat: no-repeat; }
+.option[data-type="youtube"] { background-image: url('assets/card3.png'); background-size: cover; background-position: center; background-repeat: no-repeat; }
+.option[data-type="instagram"] { background-image: url('assets/card2.png'); background-size: cover; background-position: center; background-repeat: no-repeat; }
+.option[data-type="x"] { background-image: url('assets/card1.png'); background-size: cover; background-position: center; background-repeat: no-repeat; }
+
+@media screen and (max-width: 820px) {
+	.options { min-width: 520px; }
+}
+@media screen and (max-width: 640px) {
+	.options { min-width: 420px; }
+}
+@media (max-width: 900px) {
+	/* Keep options side-by-side on small screens and allow horizontal scroll
+	   so cards appear next to each other like desktop */
+	.options { width: calc(100% - 40px); min-width: 0; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; height: 320px; padding-bottom: 6px; }
+	/* ensure the options container uses full width and internal padding so cards are not clipped */
+	.options { width: 100%; padding: 0 12px; box-sizing: border-box; }
+	.options::-webkit-scrollbar { height: 10px; }
+	.options { -webkit-overflow-scrolling: touch; -ms-overflow-style: -ms-autohiding-scrollbar; }
+	/* On mobile, closed cards should show only the icon (narrow),
+	   while an active card expands to show content. Desktop remains unchanged. */
+	/* responsive closed-card sizing so 4 closed cards fit the viewport */
+	:root { --closed-card-gap: 8px; --options-side-padding: 24px; }
+	.options { gap: var(--closed-card-gap); }
+	/* center cards horizontally inside the options container */
+	.options { justify-content: center; }
+	/* remove per-card margins on mobile; gap on container provides spacing */
+	.option { margin: 0; border-radius: 18px; transition: flex 320ms cubic-bezier(0.2,0.9,0.2,1), max-width 320ms ease; box-sizing: border-box; }
+	/* compute a closed-card width so four cards fit within the visible options area (100% minus side padding) */
+	.option:not(.active) { --closed-card-width: calc((100% - var(--options-side-padding) - (3 * var(--closed-card-gap))) / 4); }
+	.option:not(.active) { flex: 0 0 var(--closed-card-width); min-width: var(--closed-card-width); width: var(--closed-card-width); }
+	.option.active { max-width: none; }
+	.panel, .option.active .panel { display:block; }
+	/* ensure label stays inside narrow cards */
+	.label { left: 50%; transform: translateX(calc(-50% - 16px)); }
+	/* revert icon/label sizes on small screens to avoid layout overflow */
+	.label { height: 64px; padding: 4px 6px; }
+	/* larger touch targets on small screens so icons appear bigger and higher */
+	.option .icon { min-width: 84px; max-width: 84px; height: 84px; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
+	.option .icon .option-icon { width: 64px; height: 64px; border-radius: 0; }
+
+	/* MOBILE: keep closed cards with the same desktop-like shape: show icon + label, hide panel */
+	/* Closed cards keep desktop look, but sized responsively via --closed-card-width above */
+	.option:not(.active) {
+		height: auto;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		padding: 6px 8px;
+	}
+	/* hide panel content for closed cards but keep label visible */
+	.option:not(.active) .panel { display: none !important; }
+	.option:not(.active) .shadow { height: 0; }
+			/* center the label (and thus the icon) horizontally on mobile closed cards */
+			.option:not(.active) .label { bottom: 18px; left: 50%; transform: translateX(-50%); }
+	/* ensure the info text is visible on closed cards like desktop */
+	.option:not(.active) .label .info { display: flex !important; }
+	.option:not(.active) .icon { min-width: 72px; max-width: 72px; height: 72px; }
+	.option:not(.active) .icon .option-icon { width: 60px; height: 60px; }
+	.option:not(.active) .label .info { font-size: 0.88rem; }
+
+	/* When an option becomes active on mobile, expand it to show full content */
+	.options .option.active { flex: 1 1 72%; min-width: 220px; max-width: 720px; }
+}
+
+/* Mobile-side tabs: a compact vertical group shown only on small screens */
+.mobile-side-tabs {
+	display: none; /* default hidden; enabled below for small screens */
+}
+
+@media (max-width: 900px) {
+	/* position the tabs container as a small area anchored to the FAB; tabs are absolutely positioned inside */
+	.mobile-side-tabs {
+		position: fixed;
+		right: 14px;
+		bottom: 16px;
+		display: block; /* ensure visible on small screens (overrides default display:none) */
+		width: 64px;
+		height: 64px;
+		z-index: 2000;
+		pointer-events: none; /* enabled when open */
+	}
+	.mobile-side-tabs .mobile-tab {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		width: 56px;
+		height: 56px;
+		border-radius: 10px;
+		overflow: hidden;
+		background: linear-gradient(180deg, #0c1012, #050607);
+		border: 1px solid rgba(var(--seahawks-blue-rgb), 0.12);
+		box-shadow: 0 10px 22px rgba(0,0,0,0.6), 0 0 10px rgba(var(--seahawks-blue-rgb), 0.04);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding-left: 6px;
+		cursor: pointer;
+		transform: translateY(0) scale(0.95);
+		opacity: 0;
+		transition: bottom 280ms cubic-bezier(.2,.9,.2,1), transform 220ms ease, opacity 180ms ease;
+		pointer-events: auto;
+	}
+	.mobile-side-tabs .mobile-tab img { width: 36px; height: 36px; object-fit: contain; display:block; }
+}
+
+/* Hide desktop side-tabs on small screens (kept earlier but ensuring specificity) */
+@media (max-width: 900px) {
+	.side-tabs { display: none !important; }
+}
+
+/* Floating WZ FAB and sequential expand animation */
+
+.wz-fab {
+	display: none; /* shown on mobile only */
+	position: fixed;
+	right: 14px;
+	bottom: 16px;
+	width: 56px;
+	height: 56px;
+	border-radius: 10px; /* match mobile tab shape */
+	background: linear-gradient(180deg, #0c1012, #050607);
+	border: 1px solid rgba(var(--seahawks-blue-rgb), 0.12);
+	box-shadow: 0 10px 22px rgba(0,0,0,0.6), 0 0 10px rgba(var(--seahawks-blue-rgb), 0.04);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 6px;
+	z-index: 2100;
+	cursor: pointer;
+	transition: transform 180ms ease, box-shadow 160ms ease;
+}
+.wz-fab img { width: 36px; height: 36px; object-fit: contain; display:block; }
+.wz-fab:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(0,0,0,0.65), 0 0 14px rgba(var(--seahawks-blue-rgb), 0.06); }
+.wz-fab.open { transform: rotate(22deg) scale(0.98); }
+
+@media (max-width: 900px) {
+	.wz-fab { display: inline-flex; }
+	/* when fab is open, animate the mobile tabs to pop out sequentially */
+	.mobile-side-tabs { pointer-events: none; }
+	.mobile-side-tabs.open { pointer-events: auto; }
+	/* when open, position the buttons above the FAB via bottom offsets (closer spacing) */
+	.mobile-side-tabs.open .mobile-tab { opacity: 1; transform: translateY(0) scale(1); }
+	.mobile-side-tabs.open .mobile-tab:nth-child(1) { bottom: 80px; transition-delay: 0ms; }
+	.mobile-side-tabs.open .mobile-tab:nth-child(2) { bottom: 144px; transition-delay: 60ms; }
+	.mobile-side-tabs.open .mobile-tab:nth-child(3) { bottom: 208px; transition-delay: 120ms; }
+	/* rotate FAB slightly when open for feedback */
+	.wz-fab.open { transform: rotate(22deg); transition: transform 220ms ease; }
+}
+
+/* Ensure the FAB/open icon is hidden on desktop (>=901px) so it only appears on small screens */
+@media (min-width: 901px) {
+	#wz-fab, .wz-fab {
+		display: none !important;
+		visibility: hidden !important;
+		pointer-events: none !important;
+	}
+}
+
+/* Debug visuals for click inspection (use only when debugging) */
+.debug-click-outline {
+	position: absolute;
+	pointer-events: none;
+	border: 3px dashed rgba(255,50,50,0.95);
+	box-shadow: 0 6px 24px rgba(255,50,50,0.18);
+	border-radius: 6px;
+	z-index: 99999 !important;
+}
+
+.debug-click-label {
+	position: absolute;
+	pointer-events: none;
+	background: rgba(0,0,0,0.8);
+	color: #fff;
+	font-size: 12px;
+	padding: 4px 6px;
+	border-radius: 4px;
+	z-index: 100000 !important;
+}

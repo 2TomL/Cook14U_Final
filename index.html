@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Portfolio</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
+</head>
+<body>
+	<nav class="navbar">
+		<div class="navbar-content">
+			<a href="#home" class="navbar-logo">
+				<img src="assets/Cook14U_Logo_ProfilePic_X_2160x2160.png" alt="Logo" />
+			</a>
+			<button class="hamburger-menu" id="hamburger-menu" aria-label="Menu">
+				<span></span>
+				<span></span>
+				<span></span>
+			</button>
+			<ul class="navbar-links">
+				<li><a href="#home">Home</a></li>
+				<li><a href="#about">About</a></li>
+				<li><a href="#content">Content</a></li>
+				<li><a href="#community">Community</a></li>
+				<li><a href="#merch">Merch/Support</a></li>
+			</ul>
+		</div>
+	</nav>
+	<section id="home" class="section home-bg">
+		<div class="video-bg">
+			<div class="video-container">
+				<iframe id="youtube-video" src="https://www.youtube.com/embed/y0taddxYZmM?autoplay=1&mute=1&loop=1&playlist=y0taddxYZmM&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen title="Background Video"></iframe>
+			</div>
+		</div>
+		<div class="home-overlay">
+			<div class="home-photo-bg">
+				<img src="assets/hole in wall1.png" alt="Home Foto" class="home-photo-full" />
+			</div>
+			<div class="logo-fire-container">
+				<div class="fire-effect-container">
+					<canvas id="fireCanvas"></canvas>
+				</div>
+				<img src="assets/Cook14U_Logo_ProfilePic_X_2160x2160_openeyes.png" alt="Logo" class="home-logo" />
+			</div>
+			<div class="home-text">
+				<h1 class="section-title">Cook<span class="green-14">14</span>U</h1>
+				<p class="home-subtext">Welcome to my community! Join us for fun gaming.</p>
+			</div>
+			</div>
+		</div>
+	</section>
+	<section id="about" class="section">
+		<div class="wz-about">
+			<h1 class="section-title wz-frame-title">About</h1>
+			<div class="wz-frame">
+				<div class="about-inner">
+					<div class="about-left">
+						<img src="assets/about1.png" alt="About Photo" />
+					</div>
+					<div class="about-right">
+						<div class="about-card">
+							<p>I'm a lifelong gamer, I started streaming on <a href="https://twitch.tv/cook14u" target="_blank" rel="noopener">Twitch.tv/cook14u</a> just to be able to watch my gameplay in hopes of improving... It turned into this growing community I am very much blessed to be a part of. Mostly on Warzone but I play some of mostly everything... There's some laughs, there's some pains, but mostly the channel revolves around self reflecting to improve.</p>
+						</div>
+						<button class="wz-btn" id="open-setup">SHOW SETUP</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section id="content" class="section">
+		<div class="content-inner">
+			<h1 class="section-title">Content</h1>
+			<!-- spark canvas overlays the content area to render click sparks -->
+			<canvas id="contentSparkCanvas" class="content-spark-canvas" aria-hidden="true"></canvas>
+			<div class="options" id="content-options">
+			<div class="option active" data-type="twitch">
+				<div class="shadow"></div>
+				<div class="label">
+					<div class="icon"><img src="assets/twitch_tr_icon.png" alt="Twitch" class="option-icon"/></div>
+					<div class="info">
+						<div class="main">Twitch Live</div>
+						<div class="sub">Live stream</div>
+					</div>
+				</div>
+				<div class="panel">
+					<button class="option-close" aria-label="Sluiten">✕</button>
+					<!-- Twitch iframe is only set when the option becomes active -->
+					<iframe class="embed-iframe twitch-embed" data-src="https://player.twitch.tv/?channel=cook14u&parent=localhost" frameborder="0" allowfullscreen="true" scrolling="no" title="Twitch Player"></iframe>
+				</div>
+			</div>
+
+			<div class="option" data-type="youtube">
+				<div class="shadow"></div>
+					<div class="label">
+						<div class="icon"><img src="assets/yt_tr_icon.png" alt="YouTube" class="option-icon"/></div>
+					<div class="info">
+						<div class="main">YouTube Playlist</div>
+						<div class="sub">Playlist slideshow</div>
+					</div>
+				</div>
+				<div class="panel">
+					<button class="option-close" aria-label="Sluiten">✕</button>
+					<!-- Replace PLAYLIST_ID with the desired playlist id; keep enablejsapi=1 for controls to work -->
+					<iframe id="youtube-player-iframe" class="embed-iframe youtube-embed" data-src="https://www.youtube.com/embed?listType=playlist&list=PLAYLIST_ID&autoplay=0&rel=0&enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen title="YouTube Playlist"></iframe>
+					<div class="yt-controls">
+						<button class="yt-prev" aria-label="Vorige">◀</button>
+						<button class="yt-next" aria-label="Volgende">▶</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="option" data-type="instagram">
+				<div class="shadow"></div>
+					<div class="label">
+						<div class="icon"><img src="assets/insta_tr_icon.png" alt="Instagram" class="option-icon"/></div>
+					<div class="info">
+						<div class="main">Instagram</div>
+						<div class="sub">Selected feed</div>
+					</div>
+				</div>
+				<div class="panel insta-panel">
+					<button class="option-close" aria-label="Sluiten">✕</button>
+					<div class="insta-slideshow">
+						<div class="insta-image" aria-hidden="false"></div>
+						<div class="insta-controls">
+							<button class="insta-prev" aria-label="Vorige">◀</button>
+							<button class="insta-next" aria-label="Volgende">▶</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="option" data-type="x">
+				<div class="shadow"></div>
+				<div class="label">
+						<div class="icon"><img src="assets/insta_tr_icon.png" alt="Instagram" class="option-icon"/></div>
+					<div class="info">
+						<div class="main">X Feed</div>
+						<div class="sub">Latest posts</div>
+					</div>
+				</div>
+				<div class="panel">
+					<button class="option-close" aria-label="Sluiten">✕</button>
+					<iframe class="embed-iframe x-embed" data-src="https://twitframe.com/show?url=https://x.com/Cook14U" frameborder="0" allowfullscreen title="X Feed"></iframe>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section id="community" class="section">
+		<div class="wz-about">
+			<h1 class="section-title wz-frame-title">Community</h1>
+			<div class="wz-frame">
+				<div class="community-inner">
+					<div class="community-frame">
+				<div class="frame-header">
+					<h3>Join Cook14U</h3>
+					<span class="frame-badge">Discord</span>
+				</div>
+				<div class="frame-body">
+					<p class="muted">Below is a live Discord server embed. Replace <code>YOUR_SERVER_ID</code> in the iframe's <code>data-src</code> attribute with your server id and enable the Server Widget in Discord server settings.</p>
+					<!-- Discord widget is lazy-loaded. Replace YOUR_SERVER_ID with the actual server id -->
+					<div class="discord-embed-wrap">
+						<iframe class="embed-iframe discord-embed" data-src="https://discord.com/widget?id=YOUR_SERVER_ID&theme=dark" title="Cook14U Discord" frameborder="0" allowtransparency="true" sandbox="allow-scripts allow-same-origin"></iframe>
+					</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section id="merch" class="section">
+		<h1 class="section-title">Merch/Support</h1>
+		<!-- Invulling volgt -->
+	</section>
+
+	<!-- Warzone-style setup modal -->
+	<div class="wz-modal" id="wz-modal" aria-hidden="true">
+		<div class="wz-modal-content" role="dialog" aria-modal="true" aria-labelledby="wz-modal-title">
+			<div class="wz-modal-header">
+				<h3 id="wz-modal-title">My Setup</h3>
+				<button class="close-btn" id="close-wz-modal" aria-label="Close">✕</button>
+			</div>
+			<div class="setup-card setup-around">
+				<div class="media">
+					<img src="assets/PCsetup.png" alt="My Setup">
+				</div>
+				<div class="specs specs-left">
+					<ul>
+						<li><strong>Gaming:</strong> MSI 4070Ti, Ryzen 7 5800X3D, 32GB TridentZ</li>
+						<li><strong>Monitor:</strong> 27" Koorui 1440p 240Hz 1ms</li>
+						<li><strong>Audio:</strong> GO-XLR Mini, Streamdeck</li>
+					</ul>
+				</div>
+				<div class="specs specs-right">
+					<ul>
+						<li><strong>Streaming:</strong> RTX 3060Ti, Ryzen 9 3900X</li>
+						<li><strong>Mic:</strong> Shure MV7x XLR</li>
+						<li><strong>Camera:</strong> Insta360 Link 4K Webcam</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Side tabs (right edge) -->
+	<div class="side-tabs" aria-hidden="false">
+		<button class="side-tab" id="codmunity-button" title="CODmunity">
+			<img src="assets/codmunity.png" alt="CODmunity">
+		</button>
+		<button class="side-tab" id="wzmeta-button" title="WZ Stats">
+			<img src="assets/wzstats.png" alt="WZ Stats">
+		</button>
+		<button class="side-tab" id="tools-button" title="Tracker">
+			<img src="assets/tracker.png" alt="Tracker">
+		</button>
+	</div>
+
+    <!-- Mobile-side tabs: visible only on small screens; triggers the same modals as desktop side-tabs -->
+    <div class="mobile-side-tabs" aria-hidden="false">
+        <button class="mobile-tab" data-target="codmunity-button" title="CODmunity">
+            <img src="assets/codmunity.png" alt="CODmunity">
+        </button>
+        <button class="mobile-tab" data-target="wzmeta-button" title="WZ Stats">
+            <img src="assets/wzstats.png" alt="WZ Stats">
+        </button>
+        <button class="mobile-tab" data-target="tools-button" title="Tracker">
+            <img src="assets/tracker.png" alt="Tracker">
+        </button>
+    </div>
+
+	<!-- WZ floating app FAB (mobile) -->
+	<button id="wz-fab" class="wz-fab" aria-expanded="false" aria-label="Open WZ apps">
+		<img src="assets/WZapp_icon.png" alt="WZ apps">
+	</button>
+
+
+	<!-- Warzone Meta App modal -->
+	<div id="wzmeta-modal" class="modal">
+		<div class="modal-content">
+			<span class="close-modal" id="close-wzmeta">&times;</span>
+			<h2>Warzone Meta App</h2>
+			<iframe src="https://wzstats.gg/en" width="100%" height="500" class="wzmeta-iframe" title="Warzone Meta App"></iframe>
+		</div>
+	</div>
+
+	<!-- tools-panel removed: tracker iframe should only appear in the codtracker modal -->
+
+	<div id="codtracker-modal" class="modal">
+		<div class="modal-content">
+			<span class="close-modal" id="close-codtracker">&times;</span>
+			<h2>COD Tracker</h2>
+			<iframe src="https://cod.tracker.gg/warzone/loadouts" width="100%" height="500" class="codtracker-iframe" title="COD Tracker Warzone Loadouts"></iframe>
+		</div>
+	</div>
+
+	<div id="codmunity-modal" class="modal">
+		<div class="modal-content">
+			<span class="close-modal" id="close-codmunity">&times;</span>
+			<h2>CODmunity App</h2>
+			<iframe src="https://codmunity.gg/app" width="100%" height="500" class="codmunity-iframe" title="CODmunity App"></iframe>
+		</div>
+	</div>
+
+	<script src="script.js"></script>
+
+
+
+	<!-- Site footer -->
+	<footer class="site-footer" role="contentinfo">
+		<div class="footer-inner">Made by <a class="footer-link" href="https://2toml.github.io/TL_Final/" target="_blank" rel="noopener noreferrer">Tom Lamers</a> - 2025</div>
+	</footer>
+</body>
+</html>
