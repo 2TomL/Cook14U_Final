@@ -240,7 +240,17 @@ ensureThree(function initGreenSmoke() {
 	smokeMaterial = new THREE.MeshLambertMaterial({ map: smokeTextureLocal, transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.NormalBlending, color: new THREE.Color(0x009b27) });
 	try { const loader = new THREE.TextureLoader(); loader.setCrossOrigin('anonymous'); loader.load(SMOKE_IMG_URL, function(tex) { tex.needsUpdate = true; smokeMaterial.map = tex; smokeMaterial.needsUpdate = true; console.log('Smoke texture loaded from CodePen URL'); }, undefined, function(err) { console.warn('Failed to load external smoke image, using fallback texture', err); }); } catch (err) { console.warn('TextureLoader not available or failed, using local smoke texture', err); }
 	const smokeGeo = new THREE.PlaneGeometry(300, 300);
-	const PARTICLE_COUNT = 90; const w = overlay.clientWidth || window.innerWidth; const h = overlay.clientHeight || window.innerHeight; const maxRadius = Math.max(w, h) * 0.6; const minRadius = Math.min(w, h) * 0.42; const EDGE_MARGIN = Math.max(36, Math.min(w, h) * 0.08); const maxAllowedY = Math.max(0, (h / 2) - EDGE_MARGIN); const maxAllowedX = Math.max(0, (w / 2) - EDGE_MARGIN); const verticalOffset = Math.max(0, h * 0.33);
+	const PARTICLE_COUNT = 90;
+	const w = overlay.clientWidth || window.innerWidth;
+	const h = overlay.clientHeight || window.innerHeight;
+	// tighten radii and margins so smoke stays well within the visible area
+	const maxRadius = Math.max(w, h) * 0.55;
+	const minRadius = Math.min(w, h) * 0.35;
+	const EDGE_MARGIN = Math.max(48, Math.min(w, h) * 0.10);
+	const maxAllowedY = Math.max(0, (h / 2) - EDGE_MARGIN);
+	const maxAllowedX = Math.max(0, (w / 2) - EDGE_MARGIN);
+	// reduce vertical offset so particles are less likely to spawn below the viewport
+	const verticalOffset = Math.max(0, h * 0.14);
 	function clamp(val, a, b) { return Math.max(a, Math.min(b, val)); }
 	for (let p = 0; p < PARTICLE_COUNT; p++) {
 		const particle = new THREE.Mesh(smokeGeo, smokeMaterial);
@@ -250,8 +260,10 @@ ensureThree(function initGreenSmoke() {
 		const ry = radius * (h / Math.max(w, h));
 		const rawX = Math.cos(angle) * rx;
 		const rawY = Math.sin(angle) * ry;
-		const posX = clamp(rawX, -maxAllowedX, maxAllowedX);
-		const posY = clamp(rawY + verticalOffset, -maxAllowedY, maxAllowedY);
+		let posX = clamp(rawX, -maxAllowedX, maxAllowedX);
+		let posY = clamp(rawY + verticalOffset, -maxAllowedY, maxAllowedY);
+		// extra safety: nudge any particle that ended up exactly on the bottom clamp slightly up
+		if (posY >= maxAllowedY - 0.5) posY = maxAllowedY - Math.max(8, EDGE_MARGIN * 0.2);
 		particle.position.set(posX, posY, Math.random() * 800 - 400);
 		particle.rotation.z = Math.random() * Math.PI * 2;
 		let radialFactor = (radius - minRadius) / (maxRadius - minRadius);
