@@ -1,5 +1,12 @@
 # Cook14U — Project Overview & Specifications
 
+## Recent changes (2025-11-22)
+
+- Reverted the heavy engraved/glow style on the hero subtitle (`.home-subtext`) back to a simpler style for improved readability and reduced visual clutter.
+- Added client-side i18n support and a language toggle (English / Spanish). Translations live in `lang.js` and are applied by `script.js`.
+- Adjusted hero subtitle positioning (`.home-text`) using responsive `clamp()` values to avoid overlap with the logo/hole on large screens.
+
+
 This repository contains the static frontend for the Cook14U site: a small, stylized Warzone-inspired landing page with live-stream indicator, content cards, and lightweight WebGL visual effects.
 
 **Quick Summary**
@@ -31,7 +38,7 @@ This repository contains the static frontend for the Cook14U site: a small, styl
   - Element: `#live-indicator` (button with camera icon)
   - Live state: toggled by adding `.is-live` class
   - Live check: `decapi.me` Twitch endpoint is polled every 60s (best-effort). Manual overrides: right-click toggles `cook14u_force_live` in `localStorage`. A `#demo-live-toggle` button is available for visual testing.
-  - Visual: small top-right red badge plus soft pulsing ring (CSS only)
+  - Visual: small top-right red badge plus soft pulsing ring
 
 - Left-lines shader
   - Implemented in `initLeftLines()` inside `script.js` using Three.js ShaderMaterial
