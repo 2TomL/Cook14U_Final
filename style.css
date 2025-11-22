@@ -72,17 +72,25 @@
 	width: 100vw;
 	height: 100vh;
 	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-.home-text {
-	position: relative;
-	z-index: 2;
-	width: 100%;
-	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
+	justify-content: flex-start;
+}
+.home-text {
+	/* Positioned visually below the 'hole' / logo area using viewport-relative top.
+	   Use absolute on larger screens for precise placement, and switch to static
+	   flow on small screens so mobile stacking remains natural. */
+	position: absolute;
+	z-index: 2;
+	left: 50%;
+	transform: translateX(-50%);
+	/* Keep width responsive but constrained to a readable measure */
+	width: min(900px, 84%);
+	text-align: center;
+	display: block;
+	 /* move the text further down so it sits clearly below the hole/logo; increase
+		 the upper bound so very large monitors place it slightly lower */
+	 top: clamp(68vh, 72vh, 82vh); /* pushed lower on very large viewports */
 }
 .video-container {
 	position: absolute;
@@ -144,18 +152,26 @@
 }
 .home-subtext {
 	color: #fff;
-	font-size: 1.3rem;
+	/* scale font slightly with viewport but clamp for consistency */
+	font-size: clamp(1rem, 1.3vw, 1.35rem);
 	text-align: center;
-	/* reduce the subtitle offset to be less extreme */
-	margin-top: 28rem;
+	margin: 0; /* spacing handled by parent .home-text positioning */
+	line-height: 1.06; /* compact multi-line home text */
 	font-family: Arial, sans-serif;
 	font-weight: 400;
 	letter-spacing: 0.5px;
 }
+/* Reverted to simpler, earlier subtitle styling (no strong engraved/glow effect) */
+/* If you want a subtle depth, enable the small shadow below. */
+.home-subtext {
+	color: #fff;
+	text-shadow: 0 2px 6px rgba(0,0,0,0.45);
+}
 
 @media (max-width: 900px) {
-	/* on smaller screens keep the subtitle closer to the title */
-	.home-subtext { margin-top: 8rem; font-size: 1.05rem; }
+	/* on smaller screens keep the subtitle in the normal flow and closer to the title */
+	.home-text { position: static; transform: none; left: auto; top: auto; width: 100%; padding-top: 8vh; }
+	.home-subtext { margin-top: 2rem; font-size: 1.05rem; }
 }
 @font-face {
 	font-family: 'XBall';
@@ -301,6 +317,24 @@ html { scroll-behavior: smooth; }
 	font-weight: 700;
 	font-size: 0.75rem;
 	cursor: pointer;
+}
+.lang-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 8px;
+	padding: 6px 8px;
+	border-radius: 6px;
+	background: linear-gradient(180deg, #0f1315, #050607);
+	color: #dcefff;
+	border: 1px solid rgba(var(--seahawks-blue-rgb), 0.12);
+	font-weight: 700;
+	font-size: 0.75rem;
+	cursor: pointer;
+}
+
+@media (max-width: 900px) {
+	.lang-toggle { margin-left: 6px; padding: 5px 7px; font-size: 0.7rem; }
 }
 .demo-toggle.active { background: linear-gradient(180deg, rgba(255,40,40,0.14), rgba(255,40,40,0.08)); border-color: rgba(255,40,40,0.18); }
 
@@ -518,6 +552,30 @@ html { scroll-behavior: smooth; }
 		margin: 1rem;
 		padding: 0.5rem;
 	}
+}
+
+/* Desktop-specific navbar ordering: keep DOM friendly but visually place the language
+   switch to the right of the links on larger screens */
+@media (min-width: 901px) {
+	.navbar-content { align-items: center; }
+	/* allow the links to take remaining space so the lang button sits to their right */
+	.navbar-links {
+		order: 2;
+		flex: 1 1 auto;
+		justify-content: flex-end;
+		margin-right: 1rem;
+	}
+	/* ensure language toggle appears after the links */
+	.lang-toggle {
+		order: 3;
+		margin-left: 12px; /* small gap from links */
+	}
+	/* keep the live/demo controls grouped left of the links */
+	.live-indicator, .demo-toggle {
+		order: 1;
+	}
+	/* make sure hamburger remains last but hidden on desktop */
+	.hamburger-menu { order: 4; }
 }
 
 .logo-fire-container {

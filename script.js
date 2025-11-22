@@ -89,6 +89,171 @@ function __cook14u_isLegacyIOS() {
 	} catch (e) { return false; }
 }
 
+/* ------------------ Internationalization (i18n) ------------------ */
+// Simple runtime that reads `window.__cook14u_translations` from lang.js
+function __cook14u_getCurrentLang() {
+	return window.__cook14u_lang || localStorage.getItem('cook14u_lang') || 'en';
+}
+function __cook14u_setLang(lang) {
+	window.__cook14u_lang = lang;
+	localStorage.setItem('cook14u_lang', lang);
+	applyTranslations(lang);
+}
+function t(key, fallback) {
+	const lang = __cook14u_getCurrentLang();
+	const dict = window.__cook14u_translations && window.__cook14u_translations[lang];
+	return (dict && dict[key]) || fallback || '';
+}
+
+function applyTranslations(lang) {
+	try {
+		// nav links
+		const navHome = document.querySelector('.navbar-links a[href="#home"]');
+		const navContent = document.querySelector('.navbar-links a[href="#content"]');
+		const navAbout = document.querySelector('.navbar-links a[href="#about"]');
+		const navCommunity = document.querySelector('.navbar-links a[href="#community"]');
+		const navMerch = document.querySelector('.navbar-links a[href="#merch"]');
+		if (navHome) navHome.textContent = t('nav_home', navHome.textContent);
+		if (navContent) navContent.textContent = t('nav_content', navContent.textContent);
+		if (navAbout) navAbout.textContent = t('nav_about', navAbout.textContent);
+		if (navCommunity) navCommunity.textContent = t('nav_community', navCommunity.textContent);
+		if (navMerch) navMerch.textContent = t('nav_merch', navMerch.textContent);
+
+		// language toggle button
+		const langBtn = document.getElementById('lang-toggle');
+		if (langBtn) { langBtn.textContent = t('lang_label', langBtn.textContent); langBtn.title = t('lang_title', langBtn.title); }
+
+		// demo button
+		const demoBtn = document.getElementById('demo-live-toggle');
+		if (demoBtn) {
+			const forced = localStorage.getItem('cook14u_force_live') === '1';
+			demoBtn.textContent = forced ? t('demo_on', demoBtn.textContent) : t('demo_off', demoBtn.textContent);
+			demoBtn.title = t('demo_off', demoBtn.title);
+		}
+
+		// live indicator titles will be set dynamically via setLive (function uses t())
+
+		// setup button
+		const setupBtn = document.getElementById('open-setup');
+		if (setupBtn) setupBtn.textContent = t('open_setup', setupBtn.textContent);
+
+		// home subtext — prefer HTML variant (allows <br>) if available
+		const homeSub = document.querySelector('.home-subtext');
+		if (homeSub) {
+			const html = t('home_subtext_html');
+			if (html && html.length) homeSub.innerHTML = html; else homeSub.textContent = t('home_subtext', homeSub.textContent);
+		}
+
+		// content option labels and subtexts
+		const twitchMain = document.querySelector('.option[data-type="twitch"] .label .main');
+		const twitchSub = document.querySelector('.option[data-type="twitch"] .label .sub');
+		if (twitchMain) twitchMain.textContent = t('option_twitch_main', twitchMain.textContent);
+		if (twitchSub) twitchSub.textContent = t('option_twitch_sub', twitchSub.textContent);
+		const ytMain = document.querySelector('.option[data-type="youtube"] .label .main');
+		const ytSub = document.querySelector('.option[data-type="youtube"] .label .sub');
+		if (ytMain) ytMain.textContent = t('option_youtube_main', ytMain.textContent);
+		if (ytSub) ytSub.textContent = t('option_youtube_sub', ytSub.textContent);
+		const igMain = document.querySelector('.option[data-type="instagram"] .label .main');
+		const igSub = document.querySelector('.option[data-type="instagram"] .label .sub');
+		if (igMain) igMain.textContent = t('option_instagram_main', igMain.textContent);
+		if (igSub) igSub.textContent = t('option_instagram_sub', igSub.textContent);
+		const ttMain = document.querySelector('.option[data-type="tiktok"] .label .main');
+		const ttSub = document.querySelector('.option[data-type="tiktok"] .label .sub');
+		if (ttMain) ttMain.textContent = t('option_tiktok_main', ttMain.textContent);
+		if (ttSub) ttSub.textContent = t('option_tiktok_sub', ttSub.textContent);
+
+		// content-links button
+		const linkBtn = document.getElementById('content-link-btn');
+		if (linkBtn) { linkBtn.textContent = t('content_link_open', linkBtn.textContent); }
+
+		// modal/setup title
+		const wzTitle = document.getElementById('wz-modal-title');
+		if (wzTitle) wzTitle.textContent = t('modal_setup_title', wzTitle.textContent);
+
+		// About paragraph (HTML) - preserve links by using innerHTML from translations
+		const aboutPara = document.querySelector('#about .about-card p');
+		if (aboutPara) {
+			const html = t('about_paragraph_html');
+			if (html && html.length) aboutPara.innerHTML = html;
+		}
+
+		// Setup modal labels (strong elements inside the specs lists)
+		try {
+			const setupStrongs = document.querySelectorAll('#wz-modal .specs strong');
+			if (setupStrongs && setupStrongs.length >= 6) {
+				setupStrongs[0].textContent = t('setup_gaming', setupStrongs[0].textContent);
+				setupStrongs[1].textContent = t('setup_monitor', setupStrongs[1].textContent);
+				setupStrongs[2].textContent = t('setup_audio', setupStrongs[2].textContent);
+				setupStrongs[3].textContent = t('setup_streaming', setupStrongs[3].textContent);
+				setupStrongs[4].textContent = t('setup_mic', setupStrongs[4].textContent);
+				setupStrongs[5].textContent = t('setup_camera', setupStrongs[5].textContent);
+			}
+		} catch (e) { /* non-fatal */ }
+
+		// translate modal close button aria-label
+		const closeWz = document.getElementById('close-wz-modal');
+		if (closeWz) closeWz.setAttribute('aria-label', t('close_label', closeWz.getAttribute('aria-label') || 'Close'));
+
+		// footer
+		const footer = document.querySelector('.site-footer .footer-inner');
+		if (footer) footer.textContent = t('footer_credit', footer.textContent);
+
+		// section titles (map to nav labels where appropriate)
+		const secContent = document.querySelector('#content .section-title'); if (secContent) secContent.textContent = t('section_content', secContent.textContent);
+		const secAbout = document.querySelector('#about .section-title'); if (secAbout) secAbout.textContent = t('section_about', secAbout.textContent);
+		const secCommunity = document.querySelector('#community .section-title'); if (secCommunity) secCommunity.textContent = t('section_community', secCommunity.textContent);
+		const secMerch = document.querySelector('#merch .section-title'); if (secMerch) secMerch.textContent = t('section_merch', secMerch.textContent);
+
+		// community panel heading
+		const communityJoin = document.querySelector('.community-frame .frame-header h3'); if (communityJoin) communityJoin.textContent = t('join_cook14u', communityJoin.textContent);
+
+		// side-tab button titles (desktop)
+		const codBtn = document.getElementById('codmunity-button'); if (codBtn) codBtn.title = t('codmunity_btn', codBtn.title);
+		const wzBtn = document.getElementById('wzmeta-button'); if (wzBtn) wzBtn.title = t('wzmeta_btn', wzBtn.title);
+		const toolsBtn = document.getElementById('tools-button'); if (toolsBtn) toolsBtn.title = t('tools_btn', toolsBtn.title);
+
+		// mobile-side-tabs titles
+		document.querySelectorAll('.mobile-side-tabs .mobile-tab').forEach(btn => {
+			const target = btn.dataset.target;
+			if (!target) return;
+			if (target === 'codmunity-button') btn.title = t('codmunity_btn', btn.title);
+			if (target === 'wzmeta-button') btn.title = t('wzmeta_btn', btn.title);
+			if (target === 'tools-button') btn.title = t('tools_btn', btn.title);
+		});
+
+		// modal/app titles
+		const wzMeta = document.querySelector('#wzmeta-modal h2'); if (wzMeta) wzMeta.textContent = t('wzmeta_title', wzMeta.textContent);
+		const codTracker = document.querySelector('#codtracker-modal h2'); if (codTracker) codTracker.textContent = t('codtracker_title', codTracker.textContent);
+		const codmunity = document.querySelector('#codmunity-modal h2'); if (codmunity) codmunity.textContent = t('codmunity_title', codmunity.textContent);
+
+		// translate some title/tooltips
+		const liveBtn = document.getElementById('live-indicator');
+		if (liveBtn) liveBtn.title = (liveBtn.classList.contains('is-live') ? t('live_online_title') : t('live_offline_title')) || liveBtn.title;
+
+	} catch (err) { console.warn('applyTranslations error', err); }
+}
+
+// Ensure translations applied on load
+document.addEventListener('DOMContentLoaded', function(){
+	// set the initial language (reads localStorage)
+	const lang = __cook14u_getCurrentLang();
+	applyTranslations(lang);
+	// wire up the language toggle
+	const langToggle = document.getElementById('lang-toggle');
+	if (langToggle) {
+		langToggle.addEventListener('click', function(){
+			const cur = __cook14u_getCurrentLang();
+			const next = cur === 'en' ? 'es' : 'en';
+			__cook14u_setLang(next);
+			// update demo button label if present
+			const demoBtn = document.getElementById('demo-live-toggle'); if (demoBtn) {
+				const forced = localStorage.getItem('cook14u_force_live') === '1'; demoBtn.textContent = forced ? t('demo_on') : t('demo_off');
+			}
+		});
+	}
+});
+
+
 // global low-power mode flag used across scripts
 window.__cook14u_lowPowerMode = (__cook14u_isLegacyIOS() || (navigator.connection && navigator.connection.saveData));
 if (window.__cook14u_lowPowerMode) console.info('Cook14U: lowPowerMode enabled — reducing effects for older iOS / data-saver');
@@ -334,10 +499,10 @@ ensureThree(function initGreenSmoke() {
 		imageEl.style.opacity = 0;
 		setTimeout(() => {
 			// If the item looks like an Instagram post URL, render a clickable card that opens the post.
-			if (typeof url === 'string' && url.includes('instagram.com')) {
-				imageEl.style.backgroundImage = '';
-				imageEl.innerHTML = `<a class="insta-post-link" href="${url}" target="_blank" rel="noopener noreferrer">Open Instagram post</a>`;
-			} else {
+                if (typeof url === 'string' && url.includes('instagram.com')) {
+                	imageEl.style.backgroundImage = '';
+                	imageEl.innerHTML = `<a class="insta-post-link" href="${url}" target="_blank" rel="noopener noreferrer">${typeof t === 'function' ? t('open_instagram','Open Instagram post') : 'Open Instagram post'}</a>`;
+            } else {
 				// fallback: treat as direct image URL
 				imageEl.innerHTML = '';
 				imageEl.style.backgroundImage = `url('${url}')`;
@@ -1024,7 +1189,8 @@ function setupTestYouTubePlaylist(optionEl) {
 			isLive = !!v;
 			if (isLive) btn.classList.add('is-live'); else btn.classList.remove('is-live');
 			btn.setAttribute('aria-pressed', String(isLive));
-			btn.title = isLive ? 'Cook14U is LIVE — click to open Twitch' : 'Offline — click to open Discord (or open community)';
+			// Use translation helper if available
+			btn.title = isLive ? t('live_online_title', 'Cook14U is LIVE — click to open Twitch') : t('live_offline_title', 'Offline — click to open Discord (or open community)');
 		}
 
 		function openTwitchOption(){
