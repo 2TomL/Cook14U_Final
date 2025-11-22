@@ -195,8 +195,9 @@ function applyTranslations(lang) {
 		if (closeWz) closeWz.setAttribute('aria-label', t('close_label', closeWz.getAttribute('aria-label') || 'Close'));
 
 		// footer
-		const footer = document.querySelector('.site-footer .footer-inner');
-		if (footer) footer.textContent = t('footer_credit', footer.textContent);
+		// Keep footer HTML intact (contains the author link). Do not overwrite it via translations
+		// const footer = document.querySelector('.site-footer .footer-inner');
+		// if (footer) footer.textContent = t('footer_credit', footer.textContent);
 
 		// section titles (map to nav labels where appropriate)
 		const secContent = document.querySelector('#content .section-title'); if (secContent) secContent.textContent = t('section_content', secContent.textContent);
