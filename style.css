@@ -1,8 +1,9 @@
 .home-logo {
 	display: block;
-	 margin: 0;
-	 max-width: 160px;
-	 width: 16vw;
+	margin: 0;
+	/* slightly smaller than the previous bump for a balanced header */
+	max-width: 200px;
+	width: 18vw;
 	height: auto;
 	z-index: 2;
 	position: relative;
@@ -145,10 +146,16 @@
 	color: #fff;
 	font-size: 1.3rem;
 	text-align: center;
-	margin-top: 1.2rem;
+	/* reduce the subtitle offset to be less extreme */
+	margin-top: 28rem;
 	font-family: Arial, sans-serif;
 	font-weight: 400;
 	letter-spacing: 0.5px;
+}
+
+@media (max-width: 900px) {
+	/* on smaller screens keep the subtitle closer to the title */
+	.home-subtext { margin-top: 8rem; font-size: 1.05rem; }
 }
 @font-face {
 	font-family: 'XBall';
@@ -514,27 +521,29 @@ html { scroll-behavior: smooth; }
 }
 
 .logo-fire-container {
-  position: absolute;
-  top: 1vh;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  width: fit-content;
-  z-index: 100;
+	position: absolute;
+	/* nudge slightly higher for a stronger header presence */
+	top: -2vh;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	width: fit-content;
+	z-index: 100;
 }
 
 .fire-effect-container {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 180px;
-  height: 180px;
-  z-index: 110;
-  pointer-events: none;
+	position: absolute;
+	/* lower the fire effect so it sits below the logo slightly */
+	top: 36px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 180px;
+	height: 180px;
+	z-index: 110;
+	pointer-events: none;
 }
 
 #fireCanvas {
