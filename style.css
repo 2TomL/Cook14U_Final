@@ -126,6 +126,24 @@
 	pointer-events: none;
 	border-radius: 18px;
 }
+/* Intro hero video (desktop intro clip) */
+.hero-intro-video {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	object-fit: cover;
+	border-radius: 18px;
+	z-index: 0; /* same stacking as background iframe so it's visible through transparent parts of the photo */
+	transition: opacity 600ms ease;
+	background: #000;
+}
+
+/* Ensure we can fade the smoke canvas in/out when switching from intro */
+.home-smoke-canvas {
+	transition: opacity 800ms ease;
+}
 .home-bg {
 	position: relative;
 	overflow: hidden;
@@ -2029,14 +2047,14 @@ padding: 0 1rem;
 	.mobile-side-tabs {
 		position: fixed;
 		right: 14px;
-		position: relative; 
-		bottom: auto; 
-		left: auto; 
-		transform: none; 
-		display:flex; 
-		align-items:center; 
-		justify-content:center; 
-		height: auto; 
+		/* anchor to the same bottom offset as the FAB so child offsets
+		   (bottom: 80px / 144px / ...) position correctly above it */
+		bottom: 16px;
+		left: auto;
+		transform: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		height: 64px;
 		z-index: 2000;
 		pointer-events: none; /* enabled when open */

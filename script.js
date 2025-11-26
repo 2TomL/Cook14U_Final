@@ -382,10 +382,21 @@ document.addEventListener('DOMContentLoaded', function() {
 (function mobileWzFab() {
 	const fab = document.getElementById('wz-fab');
 	const tabs = document.querySelector('.mobile-side-tabs');
-	if (!fab || !tabs) return;
+	// debug: ensure elements exist and log their presence
+	if (!fab || !tabs) {
+		console.debug('mobileWzFab: missing elements', { fab: !!fab, tabs: !!tabs });
+		return;
+	}
+	console.debug('mobileWzFab: initialized', { fab: !!fab, tabs: !!tabs });
 	function open() { tabs.classList.add('open'); fab.classList.add('open'); fab.setAttribute('aria-expanded','true'); document.body.classList.add('wz-fab-open'); }
 	function close() { tabs.classList.remove('open'); fab.classList.remove('open'); fab.setAttribute('aria-expanded','false'); document.body.classList.remove('wz-fab-open'); }
-	fab.addEventListener('click', function(e) { e.stopPropagation(); const isOpen = tabs.classList.contains('open'); if (isOpen) close(); else open(); });
+	fab.addEventListener('click', function(e) {
+		e.stopPropagation();
+		const isOpen = tabs.classList.contains('open');
+		console.debug('wz-fab click, wasOpen=', isOpen);
+		if (isOpen) close(); else open();
+		console.debug('wz-fab newState open=', tabs.classList.contains('open'));
+	});
 	document.addEventListener('click', function(e) { if (!tabs.classList.contains('open')) return; const insideFab = e.target.closest('#wz-fab'); const insideTabs = e.target.closest('.mobile-side-tabs'); if (!insideFab && !insideTabs) close(); });
 	tabs.addEventListener('click', function(e) { const tabBtn = e.target.closest('.mobile-tab'); if (!tabBtn) return; setTimeout(close, 220); });
 	const mq = window.matchMedia('(min-width: 901px)');
@@ -458,6 +469,46 @@ ensureThree(function initGreenSmoke() {
 		scene.add(particle);
 		smokeParticles.push(particle);
 	}
+
+	// Expose a simple smoke controller to allow external code (intro sequence) to
+	// programmatically set and animate the smoke material's opacity. This is more
+	// reliable than CSS opacity for WebGL-rendered smoke as it directly adjusts
+	// the material used by the particles.
+	window.__cook14u_smokeController = {
+		setOpacity: function(v) {
+			try { smokeMaterial.opacity = Number(v); smokeMaterial.needsUpdate = true; } catch (e) { console.warn('smokeController.setOpacity failed', e); }
+		},
+		fadeTo: function(target, duration) {
+			try {
+				const from = smokeMaterial.opacity || 0;
+				const start = performance.now();
+				(function step(){
+					const now = performance.now();
+					const t = Math.min(1, (now - start) / duration);
+					smokeMaterial.opacity = from + (target - from) * t;
+					smokeMaterial.needsUpdate = true;
+					if (t < 1) requestAnimationFrame(step);
+				})();
+			} catch (e) { console.warn('smokeController.fadeTo failed', e); }
+		},
+		burstThenFade: function(burstOpacity, holdMs, targetOpacity, fadeMs) {
+			try {
+				smokeMaterial.opacity = Number(burstOpacity);
+				smokeMaterial.needsUpdate = true;
+				setTimeout(function(){
+					const from = smokeMaterial.opacity || burstOpacity;
+					const start = performance.now();
+					(function step(){
+						const now = performance.now();
+						const t = Math.min(1, (now - start) / fadeMs);
+						smokeMaterial.opacity = from + (targetOpacity - from) * t;
+						smokeMaterial.needsUpdate = true;
+						if (t < 1) requestAnimationFrame(step);
+					})();
+				}, holdMs);
+		} catch (e) { console.warn('smokeController.burstThenFade failed', e); }
+		}
+	};
 	function onWindowResize() { const w = overlay.clientWidth || window.innerWidth; const h = overlay.clientHeight || window.innerHeight; camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h); }
 	window.addEventListener('resize', onWindowResize); onWindowResize();
 	let delta = 0;
@@ -1493,3 +1544,134 @@ function initYouTubeForIframe(iframe, optionEl) {
 			}
 		});
 	});
+
+// Intro video handling: play a short intro clip on desktop, then fade into the smoke VFX
+document.addEventListener('DOMContentLoaded', function(){
+	try {
+		// Only run intro on larger viewports and when not in low-power mode
+		if (window.__cook14u_lowPowerMode) return;
+		if (window.innerWidth <= 900) return; // desktop-only intro
+
+		const intro = document.getElementById('intro-video');
+		const hero = document.getElementById('youtube-video');
+		if (!intro || !hero) return;
+
+		// Ensure hero iframe will be loaded after the intro finishes (force-load if needed)
+		function loadHero() {
+			try { if (hero.dataset && hero.dataset.src && !hero.src) hero.src = hero.dataset.src; } catch (e) { }
+		}
+
+		// Smoke canvas helper: try to set opacity; observe DOM if smoke canvas created later
+		function setSmokeOpacity(val) {
+			// Prefer programmatic control if Three.js smoke material is available
+			if (window.__cook14u_smokeController && typeof window.__cook14u_smokeController.setOpacity === 'function') {
+				try { window.__cook14u_smokeController.setOpacity(Number(val)); return true; } catch (e) { /* fallthrough */ }
+			}
+			const s = document.querySelector('.home-smoke-canvas');
+			if (s) { s.style.transition = s.style.transition || 'opacity 800ms ease'; s.style.opacity = String(val); return true; }
+			return false;
+		}
+
+		// Ensure smoke starts hidden while intro plays (if smoke exists later, observer will set it)
+		if (!setSmokeOpacity(0)) {
+			const mo = new MutationObserver((mut) => { if (setSmokeOpacity(0)) mo.disconnect(); });
+			mo.observe(document.body, { childList: true, subtree: true });
+		}
+
+		// Hide hero until intro finishes
+		hero.style.transition = hero.style.transition || 'opacity 600ms ease';
+		hero.style.opacity = '0';
+
+		// Attempt to autoplay the intro (muted allows autoplay on most browsers)
+		const playPromise = intro.play && intro.play();
+		if (playPromise && typeof playPromise.then === 'function') {
+			playPromise.catch(() => {
+				// Autoplay blocked — skip intro and show hero immediately
+				loadHero();
+				try { intro.remove(); } catch (e) {}
+				setSmokeOpacity(1);
+				hero.style.opacity = '1';
+			});
+		}
+
+		// Common finish routine: fade out intro, reveal smoke and hero
+		function finishIntro() {
+			try {
+				loadHero();
+				// fade out intro
+				intro.style.transition = 'opacity 600ms ease';
+				intro.style.opacity = '0';
+				// remove after transition
+				setTimeout(() => { try { intro.remove(); } catch (e) {} }, 700);
+
+				// reveal hero quickly (start loading/playing)
+				setTimeout(() => { try { hero.style.opacity = '1'; } catch (e) {} }, 120);
+
+				// Trigger a dense smoke 'burst' then fade to subtle smoke — ensure hero has been started before the fade begins.
+				if (window.__cook14u_smokeController && typeof window.__cook14u_smokeController.burstThenFade === 'function') {
+					// start a short burst (burstOpacity, holdMs, targetOpacity, fadeMs)
+					// Wait a small delay to ensure the hero iframe was given its src and began loading
+					setTimeout(() => {
+						try { window.__cook14u_smokeController.burstThenFade(1.0, 180, 0.22, 900); } catch (e) { setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450); }
+					}, 260);
+				} else {
+					// fallback to DOM-based opacity changes (less accurate since material opacity remains constant)
+					setTimeout(() => { setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450); }, 260);
+				}
+			} catch (err) { console.warn('finishIntro error', err); }
+		}
+
+		// If user clicks or presses Enter/Space on the intro, skip it
+		intro.addEventListener('click', function(e){ e.stopPropagation(); finishIntro(); });
+		intro.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); finishIntro(); } });
+
+		// On natural end, transition to the main content
+		intro.addEventListener('ended', function(){ finishIntro(); });
+
+		// Safety: if the intro doesn't start playing within 3s, skip to main
+		const fallback = setTimeout(function(){ if (document.body.contains(intro) && intro.currentTime < 0.25) finishIntro(); }, 3000);
+		intro.addEventListener('play', function(){ clearTimeout(fallback); });
+
+		// Schedule a smoke 'burst' shortly before the intro ends so the thick smoke
+		// appears at the end of the clip. Configure lead time (ms) to determine how
+		// long before the natural 'ended' event the burst should begin.
+		// Show burst this many milliseconds before the intro ends. Increase to
+		// make the burst appear earlier; decrease to make it appear closer to the end.
+		// For short clips we clamp the lead to a fraction of the video's duration.
+		// Small lead so the burst appears shortly before the clip ends — reduce
+		// this value to make the burst occur closer to the end of the intro.
+		const BURST_LEAD_MS = 1000; // ~1.0s before the intro ends (tweakable)
+		let burstTimeout = null;
+
+		function scheduleBurstBeforeEnd() {
+			try {
+				if (!intro.duration || !isFinite(intro.duration) || intro.duration <= 0) return;
+				// For very short intro videos, use a proportional lead (60% of duration)
+				const effectiveLead = Math.min(BURST_LEAD_MS, Math.max(200, intro.duration * 1000 * 0.6));
+				const msUntilEnd = Math.max(0, (intro.duration * 1000) - effectiveLead - (intro.currentTime * 1000));
+				if (burstTimeout) { clearTimeout(burstTimeout); burstTimeout = null; }
+				burstTimeout = setTimeout(function(){
+					// Only trigger burst if intro still present
+					if (!document.body.contains(intro)) return;
+					try {
+						// trigger a dense burst and then fade to subtle smoke
+						if (window.__cook14u_smokeController && typeof window.__cook14u_smokeController.burstThenFade === 'function') {
+							window.__cook14u_smokeController.burstThenFade(1.0, 180, 0.22, 900);
+						} else {
+							setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450);
+						}
+					} catch (e) { console.warn('burst trigger failed', e); }
+				}, msUntilEnd);
+			} catch (e) { console.warn('scheduleBurstBeforeEnd failed', e); }
+		}
+
+		// If metadata is available, schedule immediately; otherwise wait for it
+		if (intro.readyState >= 1 && intro.duration && isFinite(intro.duration)) scheduleBurstBeforeEnd();
+		else intro.addEventListener('loadedmetadata', scheduleBurstBeforeEnd);
+
+		// If the user skips or the intro ends, clear scheduled burst to avoid duplicate
+		intro.addEventListener('ended', function(){ if (burstTimeout) clearTimeout(burstTimeout); });
+		intro.addEventListener('seeked', scheduleBurstBeforeEnd);
+
+	} catch (err) { console.warn('Intro initialization failed', err); }
+});
