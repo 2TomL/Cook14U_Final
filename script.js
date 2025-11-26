@@ -432,7 +432,7 @@ ensureThree(function initGreenSmoke() {
 	const SMOKE_IMG_URL = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/95637/Smoke-Element.png';
 	const smokeCanvasLocal = document.createElement('canvas'); smokeCanvasLocal.width = 512; smokeCanvasLocal.height = 512; const sctx = smokeCanvasLocal.getContext('2d'); const cx = 256, cy = 256, r = 220; const g = sctx.createRadialGradient(cx, cy, 10, cx, cy, r); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.25, 'rgba(200,255,200,0.9)'); g.addColorStop(0.5, 'rgba(120,220,150,0.6)'); g.addColorStop(1, 'rgba(0,0,0,0)'); sctx.fillStyle = g; sctx.fillRect(0, 0, 512, 512);
 	const smokeTextureLocal = new THREE.CanvasTexture(smokeCanvasLocal); smokeTextureLocal.needsUpdate = true;
-	smokeMaterial = new THREE.MeshLambertMaterial({ map: smokeTextureLocal, transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.NormalBlending, color: new THREE.Color(0x009b27) });
+		smokeMaterial = new THREE.MeshLambertMaterial({ map: smokeTextureLocal, transparent: true, opacity: 0.0, depthWrite: false, blending: THREE.NormalBlending, color: new THREE.Color(0x009b27) });
 	try { const loader = new THREE.TextureLoader(); loader.setCrossOrigin('anonymous'); loader.load(SMOKE_IMG_URL, function(tex) { tex.needsUpdate = true; smokeMaterial.map = tex; smokeMaterial.needsUpdate = true; console.log('Smoke texture loaded from CodePen URL'); }, undefined, function(err) { console.warn('Failed to load external smoke image, using fallback texture', err); }); } catch (err) { console.warn('TextureLoader not available or failed, using local smoke texture', err); }
 	const smokeGeo = new THREE.PlaneGeometry(300, 300);
 	const PARTICLE_COUNT = window.__cook14u_lowPowerMode ? 18 : 90;
@@ -470,6 +470,46 @@ ensureThree(function initGreenSmoke() {
 		smokeParticles.push(particle);
 	}
 
+		// Start with smoke hidden. Schedule a dense burst after a short delay
+		// so the page appears without smoke and then 'explodes' into dense smoke
+		// which then fades back to a subtle haze.
+		const SMOKE_INITIAL_BURST_DELAY = 4749; // ms (about 4.75 seconds — nudged slightly earlier)
+		// Softer, more gradual burst: slightly lower peak, much lighter subtle haze,
+		// and a longer fade duration for a gentle transition.
+		const SMOKE_BURST_OPACITY = 0.85; // peak opacity of the dense burst (reduced)
+		const SMOKE_SUBTLE_OPACITY = 0.06; // target subtle haze after fade (lighter)
+		const SMOKE_HOLD_MS = 250; // hold the burst a bit longer so the bloom isn't a sharp click
+		const SMOKE_FADE_MS = 2200; // longer fade to make the transition gradual
+
+		// ensure initial state applied
+		try { smokeMaterial.opacity = 0.0; smokeMaterial.needsUpdate = true; } catch (e) { }
+
+		if (!window.__cook14u_lowPowerMode) {
+			setTimeout(function(){
+				try {
+					if (window.__cook14u_smokeController && typeof window.__cook14u_smokeController.burstThenFade === 'function') {
+						window.__cook14u_smokeController.burstThenFade(SMOKE_BURST_OPACITY, SMOKE_HOLD_MS, SMOKE_SUBTLE_OPACITY, SMOKE_FADE_MS);
+					} else {
+						// fallback: simple set + fade
+						smokeMaterial.opacity = SMOKE_BURST_OPACITY; smokeMaterial.needsUpdate = true;
+						setTimeout(function(){
+							const from = smokeMaterial.opacity || SMOKE_BURST_OPACITY;
+							const start = performance.now();
+							(function step(){
+								const now = performance.now();
+								let t = Math.min(1, (now - start) / SMOKE_FADE_MS);
+								// ease-out cubic for a smoother, less abrupt fade
+								t = 1 - Math.pow(1 - t, 3);
+								smokeMaterial.opacity = from + (SMOKE_SUBTLE_OPACITY - from) * t;
+								smokeMaterial.needsUpdate = true;
+								if (t < 1) requestAnimationFrame(step);
+							})();
+						}, SMOKE_HOLD_MS);
+					}
+				} catch (e) { console.warn('scheduled smoke burst failed', e); }
+			}, SMOKE_INITIAL_BURST_DELAY);
+		}
+
 	// Expose a simple smoke controller to allow external code (intro sequence) to
 	// programmatically set and animate the smoke material's opacity. This is more
 	// reliable than CSS opacity for WebGL-rendered smoke as it directly adjusts
@@ -500,7 +540,9 @@ ensureThree(function initGreenSmoke() {
 					const start = performance.now();
 					(function step(){
 						const now = performance.now();
-						const t = Math.min(1, (now - start) / fadeMs);
+						let t = Math.min(1, (now - start) / fadeMs);
+						// ease-out cubic to make fade feel more natural and gradual
+						t = 1 - Math.pow(1 - t, 3);
 						smokeMaterial.opacity = from + (targetOpacity - from) * t;
 						smokeMaterial.needsUpdate = true;
 						if (t < 1) requestAnimationFrame(step);
@@ -714,20 +756,8 @@ ensureThree(function initGreenSmoke() {
 			entries.forEach(entry => {
 				if (!entry.isIntersecting) return;
 				if (!hero.dataset.loaded) {
-					// If an intro video exists and we're on desktop, defer loading the hero
-					// so the intro can hand over and we can intentionally start the
-					// background video slightly later for timing control.
-					const introEl = document.getElementById('intro-video');
-					if (introEl && document.body.contains(introEl) && window.innerWidth > 900) {
-						// mark deferred so finishIntro can decide when to actually load
-						hero.dataset.deferred = '1';
-						return;
-					}
-					// Default path: append start=0 and load immediately
-					let src = hero.dataset.src || '';
-					if (!/[?&]start=/.test(src)) src += (src.indexOf('?') !== -1 ? '&' : '?') + 'start=0';
-					hero.src = src;
-					try { hero.dataset.loaded = '1'; } catch (e) {}
+					hero.src = hero.dataset.src;
+					hero.dataset.loaded = '1';
 				}
 				obs.disconnect();
 			});
@@ -1577,189 +1607,4 @@ function initYouTubeForIframe(iframe, optionEl) {
 		});
 	});
 
-// Intro video handling: play a short intro clip on desktop, then fade into the smoke VFX
-document.addEventListener('DOMContentLoaded', function(){
-	try {
-		// Only run intro on larger viewports and when not in low-power mode
-		if (window.__cook14u_lowPowerMode) return;
-		if (window.innerWidth <= 900) return; // desktop-only intro
-
-		const intro = document.getElementById('intro-video');
-		const hero = document.getElementById('youtube-video');
-		if (!intro || !hero) return;
-
-		// Ensure hero iframe will be loaded after the intro finishes (force-load if needed)
-		// Returns a Promise that resolves when the hero iframe has fired its `load` event
-		// or after a fallback timeout. This allows the intro hand-off to wait for
-		// the hero to be ready before crossfading, preventing visual jumps.
-		function loadHero() {
-			return new Promise((resolve) => {
-				try {
-					if (hero.dataset && hero.dataset.src) {
-						let src = hero.dataset.src || '';
-						if (!/[?&]start=/.test(src)) src += (src.indexOf('?') !== -1 ? '&' : '?') + 'start=0';
-						// If src already set and marked loaded, resolve immediately
-						if (hero.src && hero.src === src && hero.dataset && hero.dataset.loaded === '1') {
-							try { delete hero.dataset.deferred; } catch (e) {}
-							return resolve();
-						}
-						// Handler to resolve once iframe emits load
-						let called = false;
-						function onLoadOnce() {
-							if (called) return; called = true;
-							try { hero.removeEventListener('load', onLoadOnce); } catch (e) {}
-							try { hero.dataset.loaded = '1'; } catch (e) {}
-							try { delete hero.dataset.deferred; } catch (e) {}
-							resolve();
-						}
-						// Attach load listener and assign src (this triggers load)
-						hero.addEventListener('load', onLoadOnce);
-						try { hero.src = src; } catch (e) { /* ignore */ }
-						// Fallback: if load doesn't fire, resolve after timeout
-						setTimeout(onLoadOnce, 1500);
-						return;
-					}
-				} catch (e) { /* fall through */ }
-				// Nothing to load; resolve immediately
-				resolve();
-			});
-		}
-
-		// How long to wait after the intro hands over before starting the hero video
-		const HERO_LOAD_DELAY_MS = 700; // configurable: increase to start hero later
-
-		// Smoke canvas helper: try to set opacity; observe DOM if smoke canvas created later
-		function setSmokeOpacity(val) {
-			// Prefer programmatic control if Three.js smoke material is available
-			if (window.__cook14u_smokeController && typeof window.__cook14u_smokeController.setOpacity === 'function') {
-				try { window.__cook14u_smokeController.setOpacity(Number(val)); return true; } catch (e) { /* fallthrough */ }
-			}
-			const s = document.querySelector('.home-smoke-canvas');
-			if (s) { s.style.transition = s.style.transition || 'opacity 800ms ease'; s.style.opacity = String(val); return true; }
-			return false;
-		}
-
-		// Ensure smoke starts hidden while intro plays (if smoke exists later, observer will set it)
-		if (!setSmokeOpacity(0)) {
-			const mo = new MutationObserver((mut) => { if (setSmokeOpacity(0)) mo.disconnect(); });
-			mo.observe(document.body, { childList: true, subtree: true });
-		}
-
-		// Hide hero until intro finishes
-		hero.style.transition = hero.style.transition || 'opacity 600ms ease';
-		hero.style.opacity = '0';
-
-		// Attempt to autoplay the intro (muted allows autoplay on most browsers)
-		const playPromise = intro.play && intro.play();
-		if (playPromise && typeof playPromise.then === 'function') {
-			playPromise.catch(() => {
-				// Autoplay blocked — skip intro and show hero immediately
-				loadHero();
-				try { intro.remove(); } catch (e) {}
-				setSmokeOpacity(1);
-				hero.style.opacity = '1';
-			});
-		}
-
-		// Common finish routine: fade out intro, reveal smoke and hero
-		function finishIntro() {
-			try {
-				// If the hero load was deferred (intro present), wait for the hero to
-				// finish loading before we crossfade. This prevents a visual jump where
-				// the hero is assigned while the intro is fading out.
-				const shouldDefer = hero.dataset && hero.dataset.deferred;
-				if (shouldDefer) {
-					// Start loading after the configured delay, then wait for load before crossfade
-					setTimeout(() => {
-						loadHero().then(onceCrossfade).catch(onceCrossfade);
-					}, HERO_LOAD_DELAY_MS);
-				} else {
-					// No deferral: ensure hero is loaded (or already loaded) and then crossfade
-					loadHero().then(onceCrossfade).catch(onceCrossfade);
-				}
-				// Use smoother transitions that coordinate hero load and intro fade
-				intro.style.transition = 'opacity 900ms cubic-bezier(0.2,0.8,0.2,1)';
-				hero.style.transition = 'opacity 900ms cubic-bezier(0.2,0.8,0.2,1)';
-				intro.style.willChange = 'opacity';
-				hero.style.willChange = 'opacity';
-
-				const doCrossfade = function() {
-					// Reveal hero first, then fade intro slightly after for overlap
-					try { hero.style.opacity = '1'; } catch (e) {}
-					setTimeout(() => { try { intro.style.opacity = '0'; } catch (e) {} }, 80);
-
-					// remove intro after the crossfade completes
-					setTimeout(() => { try { intro.remove(); } catch (e) {} }, 1050);
-
-					// Trigger smoke burst timed with the crossfade
-					// start smoke a tiny bit later (1ms) to fine-tune timing
-					if (window.__cook14u_smokeController && typeof window.__cook14u_smokeController.burstThenFade === 'function') {
-						try { setTimeout(() => { window.__cook14u_smokeController.burstThenFade(1.0, 180, 0.22, 900); }, 1); }
-						catch (e) { setTimeout(() => { setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450); }, 1); }
-					} else {
-						setTimeout(() => { setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450); }, 1);
-					}
-				};
-
-				// If the hero iframe can signal load, wait for its load event (but fallback to timeout)
-				let did = false;
-				function onceCrossfade() { if (did) return; did = true; try { hero.removeEventListener('load', onceCrossfade); } catch (e) {} doCrossfade(); }
-
-				// Now handled by loadHero() promise above; nothing more to do here.
-			} catch (err) { console.warn('finishIntro error', err); }
-		}
-
-		// If user clicks or presses Enter/Space on the intro, skip it
-		intro.addEventListener('click', function(e){ e.stopPropagation(); finishIntro(); });
-		intro.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); finishIntro(); } });
-
-		// On natural end, transition to the main content
-		intro.addEventListener('ended', function(){ finishIntro(); });
-
-		// Safety: if the intro doesn't start playing within 3s, skip to main
-		const fallback = setTimeout(function(){ if (document.body.contains(intro) && intro.currentTime < 0.25) finishIntro(); }, 3000);
-		intro.addEventListener('play', function(){ clearTimeout(fallback); });
-
-		// Schedule a smoke 'burst' shortly before the intro ends so the thick smoke
-		// appears at the end of the clip. Configure lead time (ms) to determine how
-		// long before the natural 'ended' event the burst should begin.
-		// Show burst this many milliseconds before the intro ends. Increase to
-		// make the burst appear earlier; decrease to make it appear closer to the end.
-		// For short clips we clamp the lead to a fraction of the video's duration.
-		// Small lead so the burst appears shortly before the clip ends — reduce
-		// this value to make the burst occur closer to the end of the intro.
-		const BURST_LEAD_MS = 1000; // ~1.0s before the intro ends (tweakable)
-		let burstTimeout = null;
-
-		function scheduleBurstBeforeEnd() {
-			try {
-				if (!intro.duration || !isFinite(intro.duration) || intro.duration <= 0) return;
-				// For very short intro videos, use a proportional lead (60% of duration)
-				const effectiveLead = Math.min(BURST_LEAD_MS, Math.max(200, intro.duration * 1000 * 0.6));
-				const msUntilEnd = Math.max(0, (intro.duration * 1000) - effectiveLead - (intro.currentTime * 1000));
-				if (burstTimeout) { clearTimeout(burstTimeout); burstTimeout = null; }
-				burstTimeout = setTimeout(function(){
-					// Only trigger burst if intro still present
-					if (!document.body.contains(intro)) return;
-					try {
-						// trigger a dense burst and then fade to subtle smoke
-						if (window.__cook14u_smokeController && typeof window.__cook14u_smokeController.burstThenFade === 'function') {
-							setTimeout(() => { window.__cook14u_smokeController.burstThenFade(1.0, 180, 0.22, 900); }, 1);
-						} else {
-							setTimeout(() => { setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450); }, 1);
-						}
-					} catch (e) { console.warn('burst trigger failed', e); }
-				}, msUntilEnd);
-			} catch (e) { console.warn('scheduleBurstBeforeEnd failed', e); }
-		}
-
-		// If metadata is available, schedule immediately; otherwise wait for it
-		if (intro.readyState >= 1 && intro.duration && isFinite(intro.duration)) scheduleBurstBeforeEnd();
-		else intro.addEventListener('loadedmetadata', scheduleBurstBeforeEnd);
-
-		// If the user skips or the intro ends, clear scheduled burst to avoid duplicate
-		intro.addEventListener('ended', function(){ if (burstTimeout) clearTimeout(burstTimeout); });
-		intro.addEventListener('seeked', scheduleBurstBeforeEnd);
-
-	} catch (err) { console.warn('Intro initialization failed', err); }
-});
+// Intro video removed: desktop intro clip has been disabled per request.

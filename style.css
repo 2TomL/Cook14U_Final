@@ -36,25 +36,23 @@
 	z-index: 0;
 }
 
-/* Smoke canvas placed over background photo but under text */
 .home-smoke-canvas {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    z-index: 1; /* above the bg (z-index 0) but below text (z-index 2) */
+    z-index: 1; 
     pointer-events: none;
 }
 
-/* Left-side lines canvas (same stacking as smoke) */
 .home-lines-canvas {
 	position: absolute;
 	left: 0;
 	top: 0;
 	width: 100%;
 	height: 100%;
-	z-index: 1; /* over background photo but below main overlay text/logo */
+	z-index: 1; 
 	pointer-events: none;
 }
 .home-photo-full {
@@ -76,20 +74,14 @@
 	justify-content: flex-start;
 }
 .home-text {
-	/* Positioned visually below the 'hole' / logo area using viewport-relative top.
-	   Use absolute on larger screens for precise placement, and switch to static
-	   flow on small screens so mobile stacking remains natural. */
 	position: absolute;
 	z-index: 2;
 	left: 50%;
 	transform: translateX(-50%);
-	/* Keep width responsive but constrained to a readable measure */
 	width: min(900px, 84%);
 	text-align: center;
 	display: block;
-	 /* move the text further down so it sits clearly below the hole/logo; increase
-		 the upper bound so very large monitors place it slightly lower */
-	 top: clamp(68vh, 72vh, 82vh); /* pushed lower on very large viewports */
+	 top: clamp(68vh, 72vh, 82vh); 
 }
 .video-container {
 	position: absolute;
@@ -124,7 +116,6 @@
 	left: 0;
 	pointer-events: none;
 	border-radius: 18px;
-	/* smoother fade-in/fade-out when swapping with intro */
 	transition: opacity 900ms cubic-bezier(0.2,0.8,0.2,1);
 	will-change: opacity;
 }
@@ -137,8 +128,7 @@
 	left: 0;
 	object-fit: cover;
 	border-radius: 18px;
-	z-index: 0; /* same stacking as background iframe so it's visible through transparent parts of the photo */
-	/* slightly longer crossfade for a smoother visual transition */
+	z-index: 0; 
 	transition: opacity 900ms cubic-bezier(0.2,0.8,0.2,1);
 	will-change: opacity;
 	background: #000;
@@ -146,7 +136,6 @@
 
 /* Ensure we can fade the smoke canvas in/out when switching from intro */
 .home-smoke-canvas {
-	/* keep smoke fade consistent with video crossfade timing */
 	transition: opacity 900ms cubic-bezier(0.2,0.8,0.2,1);
 	will-change: opacity;
 }
@@ -176,24 +165,21 @@
 }
 .home-subtext {
 	color: #fff;
-	/* scale font slightly with viewport but clamp for consistency */
 	font-size: clamp(1rem, 1.3vw, 1.35rem);
 	text-align: center;
-	margin: 0; /* spacing handled by parent .home-text positioning */
-	line-height: 1.06; /* compact multi-line home text */
+	margin: 0; 
+	line-height: 1.06; 
 	font-family: Arial, sans-serif;
 	font-weight: 400;
 	letter-spacing: 0.5px;
 }
-/* Reverted to simpler, earlier subtitle styling (no strong engraved/glow effect) */
-/* If you want a subtle depth, enable the small shadow below. */
+
 .home-subtext {
 	color: #fff;
 	text-shadow: 0 2px 6px rgba(0,0,0,0.45);
 }
 
 @media (max-width: 900px) {
-	/* on smaller screens keep the subtitle in the normal flow and closer to the title */
 	.home-text { position: static; transform: none; left: auto; top: auto; width: 100%; padding-top: 8vh; }
 	.home-subtext { margin-top: 2rem; font-size: 1.05rem; }
 }
@@ -216,7 +202,6 @@ body {
     padding-top: 64px;
 }
 
-/* ensure anchor targets are visible below fixed navbar */
 html { scroll-behavior: smooth; }
 .section, .wz-frame { scroll-margin-top: calc(var(--navbar-height) + 12px); }
 
@@ -229,7 +214,6 @@ html { scroll-behavior: smooth; }
 	left: 0;
 	width: 100%;
 	z-index: 1000;
-	/* iets fellere, maar minder brede Seahawks-blue glow */
 	box-shadow: 0 6px 18px rgba(var(--seahawks-blue-rgb),0.26),
 		0 0 12px rgba(var(--seahawks-blue-rgb),0.14);
 	transition: box-shadow 0.20s ease, transform 0.20s ease;
@@ -285,11 +269,8 @@ html { scroll-behavior: smooth; }
 	z-index: 2200;
 }
 .live-indicator img { width: 28px; height: 28px; display:block; border-radius:50%; }
-
-/* Improved live indicator: smaller badge positioned top-right so it doesn't cover the icon */
 .live-indicator img { position: relative; z-index: 4; }
 .live-indicator.is-live::before {
-	/* small badge dot positioned near top-right of the button */
 	content: '';
 	position: absolute;
 	right: 8px; top: 8px;
@@ -298,11 +279,10 @@ html { scroll-behavior: smooth; }
 	border-radius: 50%;
 	background: radial-gradient(circle, #ff6b6b 0%, #ff3b3b 60%);
 	box-shadow: 0 0 8px rgba(255,70,70,0.9);
-	z-index: 5; /* above pulse but below icon z-index 6 ensures icon remains clear */
+	z-index: 5; 
 	pointer-events: none;
 }
 .live-indicator.is-live::after {
-	/* softer blurred pulse anchored to the same top-right point */
 	content: '';
 	position: absolute;
 	right: 6px; top: 6px;
@@ -322,26 +302,10 @@ html { scroll-behavior: smooth; }
 	100% { transform: scale(1.9); opacity: 0; }
 }
 
-/* Slight visual when live: stronger icon glow but keep it readable */
 .live-indicator.is-live img { filter: drop-shadow(0 6px 10px rgba(255,50,50,0.35)); }
 
-/* Demo toggle button (temporary for visual testing) */
 
-.demo-toggle {
-	/* hidden by default; JS reveals this temporary test control when needed */
-	display: none;
-	align-items: center;
-	justify-content: center;
-	margin-left: 8px;
-	padding: 6px 8px;
-	border-radius: 6px;
-	background: linear-gradient(180deg, #0f1315, #050607);
-	color: #dcefff;
-	border: 1px solid rgba(var(--seahawks-blue-rgb), 0.12);
-	font-weight: 700;
-	font-size: 0.75rem;
-	cursor: pointer;
-}
+/* demo-toggle removed (unused) */
 .lang-toggle {
 	display: inline-flex;
 	align-items: center;
@@ -360,13 +324,11 @@ html { scroll-behavior: smooth; }
 @media (max-width: 900px) {
 	.lang-toggle { margin-left: 6px; padding: 5px 7px; font-size: 0.7rem; }
 }
-.demo-toggle.active { background: linear-gradient(180deg, rgba(255,40,40,0.14), rgba(255,40,40,0.08)); border-color: rgba(255,40,40,0.18); }
 
 @media (max-width: 900px) {
 	/* ensure navbar icon doesn't crowd logo on small screens */
-	.live-indicator { width: 40px; height: 40px; margin-left: 8px; }
-	.live-indicator img { width: 26px; height: 26px; }
-	.demo-toggle { margin-left: 6px; padding: 5px 7px; font-size: 0.7rem; }
+ 	.live-indicator { width: 40px; height: 40px; margin-left: 8px; }
+ 	.live-indicator img { width: 26px; height: 26px; }
 }
 .navbar-links {
 	list-style: none;
