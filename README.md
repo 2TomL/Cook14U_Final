@@ -64,5 +64,6 @@ This repository contains the static frontend for the Cook14U site: a small, styl
 
 - Theme color: `--seahawks-blue-rgb` in `style.css`.
 - Twitch Credentials: Update `CLIENT_ID` and `CLIENT_SECRET` in `script.js` if they change.
+
 **Credits**
 - Built and styled for the Cook14U project by Tom Lamers.
