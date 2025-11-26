@@ -2,10 +2,13 @@
 
 ## Recent changes (2025-11-22)
 
-- Reverted the heavy engraved/glow style on the hero subtitle (`.home-subtext`) back to a simpler style for improved readability and reduced visual clutter.
-- Added client-side i18n support and a language toggle (English / Spanish). Translations live in `lang.js` and are applied by `script.js`.
-- Adjusted hero subtitle positioning (`.home-text`) using responsive `clamp()` values to avoid overlap with the logo/hole on large screens.
-
+- **Twitch Integration:** Replaced `decapi.me` with official Twitch API for live status checks.
+  - Uses Client ID and Client Secret to fetch status.
+  - Automatically switches the Twitch card embed between the Live Stream (when online) and the latest VOD (when offline).
+- **YouTube Playlist:** Updated the YouTube card to play a specific playlist (`PLiTMPYv3qvSazAK3SIEj3QYuxX2ds2ouI`) and enabled navigation controls via the YouTube IFrame API.
+- **Footer Fix:** Prevented translation script from overwriting the footer HTML, preserving the author link.
+- **Style Reversion:** Reverted the heavy engraved/glow style on the hero subtitle (`.home-subtext`) back to a simpler style.
+- **I18n:** Added client-side i18n support and a language toggle (English / Spanish).
 
 This repository contains the static frontend for the Cook14U site: a small, stylized Warzone-inspired landing page with live-stream indicator, content cards, and lightweight WebGL visual effects.
 
@@ -19,55 +22,41 @@ This repository contains the static frontend for the Cook14U site: a small, styl
 
 - Live indicator in the navbar with an animated badge and demo toggle.
 - Green smoke VFX (Three.js particles) tuned to spawn within the viewport.
-- Left-side (and mirrored right-side) animated lines implemented as a shader canvas (fixed to viewport with scroll-linked animation).
+- Left-side (and mirrored right-side) animated lines implemented as a shader canvas.
 - Content cards section with platform options: Twitch, YouTube, Instagram, TikTok.
-- Dynamic single platform link shown under the active content card (styled like the `SHOW SETUP` button).
-- Responsive layout optimized for desktop and mobile (mobile FAB + side tabs).
-- Lightweight lazy-loading for embedded iframes (iframes use `data-src` and are loaded only when needed).
+- Dynamic single platform link shown under the active content card.
+- Responsive layout optimized for desktop and mobile.
+- Lightweight lazy-loading for embedded iframes.
 
 **Important Files**
 
-- `index.html` — Main markup and anchors for the navbar, content cards, modals, and embed placeholders.
-- `style.css` — All styling, variables, responsive breakpoints, and the Warzone-style UI tokens.
-- `script.js` — App logic: VFX inits (`initLeftLines`, smoke), content card behavior, live indicator controller, demo toggle, and helpers.
-- `assets/` — Images, icons and other media used by the site.
+- `index.html` — Main markup and anchors.
+- `style.css` — All styling, variables, and UI tokens.
+- `script.js` — App logic: VFX, content card behavior, live indicator controller (Twitch API), and helpers.
+- `assets/` — Images, icons and other media.
 
 **Key Specifications**
 
 - Live indicator
-  - Element: `#live-indicator` (button with camera icon)
-  - Live state: toggled by adding `.is-live` class
-  - Live check: `decapi.me` Twitch endpoint is polled every 60s (best-effort). Manual overrides: right-click toggles `cook14u_force_live` in `localStorage`. A `#demo-live-toggle` button is available for visual testing.
-  - Visual: small top-right red badge plus soft pulsing ring
-
-- Left-lines shader
-  - Implemented in `initLeftLines()` inside `script.js` using Three.js ShaderMaterial
-  - Configurable uniforms: `uGlow`, `uThickness`, `uLines`, `uLeftOffset`, `uSpeed`, `uScroll` and `uTime`
-  - Render method: fullscreen orthographic plane; canvas fixed to the viewport and updated each animation frame
-
-- Smoke (Three.js particles)
-  - Spawns particles inside a constrained region so smoke appears within the visible viewport
-  - Particle textures derived from `assets` / generated textures and updated per-frame
+  - Element: `#live-indicator`
+  - Live state: toggled by adding `.is-live` class.
+  - Live check: Uses Twitch API (Helix) to check stream status every 60s.
+  - **Note:** The implementation uses a Client Secret in client-side code (`script.js`). This is generally insecure for production apps but implemented here per request for a static site.
+  - Visual: small top-right red badge plus soft pulsing ring.
 
 - Content cards & dynamic link
-  - Cards: `.option[data-type="twitch"|"youtube"|"instagram"|"tiktok"]`
-  - Lazy-loading: `iframe[data-src]` attributes are copied to `src` when the card becomes active
-  - Platform link: `#content-link-btn` is updated by `derivePlatformLink()` to point to the appropriate profile or playlist
-  - Currently configured profile URLs:
-    - YouTube: `https://www.youtube.com/@Cook14u`
-    - Instagram: `https://www.instagram.com/cook14u2/`
-    - Twitch: `https://twitch.tv/cook14u`
-    - TikTok: `https://www.tiktok.com/@Cook14U`
+  - **Twitch:** Embeds live player if online, or latest VOD if offline.
+  - **YouTube:** Embeds playlist `PLiTMPYv3qvSazAK3SIEj3QYuxX2ds2ouI`.
+  - **Instagram/TikTok:** Embeds profile or feed.
+  - Platform link: `#content-link-btn` points to the appropriate profile.
 
-- Accessibility & keyboard
-  - Buttons and interactive elements use `aria-label` and `title` attributes.
-  - Focus-visible outlines are preserved for keyboard users (`:focus-visible` rules in `style.css`).
+- Left-lines shader & Smoke
+  - Implemented in `script.js` using Three.js.
 
 **Customization**
 
-- Theme color: `--seahawks-blue-rgb` (RGB tuple) is used across the stylesheet for glow/accents. Change this CSS variable at the top of `style.css` to recolor accents uniformly.
-- Shader tuning: modify the uniforms inside `initLeftLines()` (in `script.js`) to adjust glow, thickness, line count and speed.
-- Smoke parameters: tune spawn bounds, particle count and life inside `initGreenSmoke()`.
+- Theme color: `--seahawks-blue-rgb` in `style.css`.
+- Twitch Credentials: Update `CLIENT_ID` and `CLIENT_SECRET` in `script.js` if they change.
 
 **Local preview**
 
@@ -80,31 +69,5 @@ python -m http.server 8000
 # then open http://localhost:8000 in your browser
 ```
 
-2. To preview the live badge manually via DevTools console:
-
-```js
-// show live state
-document.getElementById('live-indicator').classList.add('is-live')
-// hide live state
-document.getElementById('live-indicator').classList.remove('is-live')
-// or use the Demo toggle button
-document.getElementById('demo-live-toggle').click()
-```
-
-**Developer notes**
-
-- The project uses no build step — edits to `index.html`, `style.css`, or `script.js` are immediately testable by reloading the page.
-- Some embed providers require a matching `parent` or `origin` to be set in embed URLs for local testing (e.g., Twitch requires `parent=localhost` when testing locally).
-- The live check endpoint (`decapi.me`) is unauthenticated and may be rate-limited or change. Consider replacing with your own service or Twitch API token for production.
-
 **Credits**
 - Built and styled for the Cook14U project by Tom Lamers.
-
-**Next steps (suggested)**
-- Replace test YouTube playlist with channel-specific playlist or dynamic feed.
-- Add server-side health check or Twitch API-backed live status for reliability.
-- Optional: bundle assets and enable a basic build step if deploying to a CDN.
-
----
-
-If you want changes to the README content or a different layout (shorter one-pager vs detailed developer doc), tell me which sections to modify and I'll update the file.

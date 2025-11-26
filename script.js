@@ -123,13 +123,7 @@ function applyTranslations(lang) {
 		const langBtn = document.getElementById('lang-toggle');
 		if (langBtn) { langBtn.textContent = t('lang_label', langBtn.textContent); langBtn.title = t('lang_title', langBtn.title); }
 
-		// demo button
-		const demoBtn = document.getElementById('demo-live-toggle');
-		if (demoBtn) {
-			const forced = localStorage.getItem('cook14u_force_live') === '1';
-			demoBtn.textContent = forced ? t('demo_on', demoBtn.textContent) : t('demo_off', demoBtn.textContent);
-			demoBtn.title = t('demo_off', demoBtn.title);
-		}
+		// demo button (hidden/removed in HTML) — no-op (kept for backward compatibility)
 
 		// live indicator titles will be set dynamically via setLive (function uses t())
 
@@ -157,10 +151,10 @@ function applyTranslations(lang) {
 		const igSub = document.querySelector('.option[data-type="instagram"] .label .sub');
 		if (igMain) igMain.textContent = t('option_instagram_main', igMain.textContent);
 		if (igSub) igSub.textContent = t('option_instagram_sub', igSub.textContent);
-		const ttMain = document.querySelector('.option[data-type="tiktok"] .label .main');
-		const ttSub = document.querySelector('.option[data-type="tiktok"] .label .sub');
-		if (ttMain) ttMain.textContent = t('option_tiktok_main', ttMain.textContent);
-		if (ttSub) ttSub.textContent = t('option_tiktok_sub', ttSub.textContent);
+		const ttMain = document.querySelector('.option[data-type="rumble"] .label .main');
+		const ttSub = document.querySelector('.option[data-type="rumble"] .label .sub');
+		if (ttMain) ttMain.textContent = t('option_rumble_main', ttMain.textContent);
+		if (ttSub) ttSub.textContent = t('option_rumble_sub', ttSub.textContent);
 
 		// content-links button
 		const linkBtn = document.getElementById('content-link-btn');
@@ -239,17 +233,14 @@ document.addEventListener('DOMContentLoaded', function(){
 	// set the initial language (reads localStorage)
 	const lang = __cook14u_getCurrentLang();
 	applyTranslations(lang);
-	// wire up the language toggle
+		// wire up the language toggle
 	const langToggle = document.getElementById('lang-toggle');
 	if (langToggle) {
 		langToggle.addEventListener('click', function(){
 			const cur = __cook14u_getCurrentLang();
 			const next = cur === 'en' ? 'es' : 'en';
 			__cook14u_setLang(next);
-			// update demo button label if present
-			const demoBtn = document.getElementById('demo-live-toggle'); if (demoBtn) {
-				const forced = localStorage.getItem('cook14u_force_live') === '1'; demoBtn.textContent = forced ? t('demo_on') : t('demo_off');
-			}
+				// demo button removed — no UI to update
 		});
 	}
 });
@@ -476,18 +467,11 @@ ensureThree(function initGreenSmoke() {
 	animate();
 });
 (function contentEmbeds() {
-	// Instagram-like slideshow (uses external placeholder images)
+	// Instagram-like slideshow (loads local images from `assets/insta` via manifest.json)
 	const instaFrame = document.querySelector('.insta-slideshow');
 	if (!instaFrame) return;
 
-	// Use provided Instagram post URLs for quick content testing.
-	// These open the Instagram post in a new tab when clicked (reliable without needing oEmbed APIs).
-	const images = [
-		'https://www.instagram.com/p/DPKXw_vj1rb/',
-		'https://www.instagram.com/p/DPKXw_vj1rb/',
-		'https://www.instagram.com/p/DMeQjlKS1gv/'
-	];
-
+	let images = [];
 	const imageEl = instaFrame.querySelector('.insta-image');
 	const prevBtn = instaFrame.querySelector('.insta-prev');
 	const nextBtn = instaFrame.querySelector('.insta-next');
@@ -495,21 +479,60 @@ ensureThree(function initGreenSmoke() {
 	let timer = null;
 
 	function show(i) {
+		if (!images || images.length === 0) return;
 		idx = (i + images.length) % images.length;
 		const url = images[idx];
-		imageEl.style.opacity = 0;
-		setTimeout(() => {
-			// If the item looks like an Instagram post URL, render a clickable card that opens the post.
-                if (typeof url === 'string' && url.includes('instagram.com')) {
-                	imageEl.style.backgroundImage = '';
-                	imageEl.innerHTML = `<a class="insta-post-link" href="${url}" target="_blank" rel="noopener noreferrer">${typeof t === 'function' ? t('open_instagram','Open Instagram post') : 'Open Instagram post'}</a>`;
-            } else {
-				// fallback: treat as direct image URL
-				imageEl.innerHTML = '';
-				imageEl.style.backgroundImage = `url('${url}')`;
-			}
-			imageEl.style.opacity = 1;
-		}, 220);
+
+		// create a new image element for smooth crossfade
+		const newImg = document.createElement('img');
+		newImg.className = 'insta-img';
+		newImg.src = url;
+		newImg.alt = 'Instagram image';
+		newImg.decoding = 'async';
+		newImg.style.opacity = '0';
+
+		// Ensure overlay (non-navigating) exists and is above images.
+		// Use a div with role=button so clicks advance the slideshow instead of opening the image.
+		let overlay = imageEl.querySelector('.insta-post-link.full-link');
+		if (!overlay) {
+			overlay = document.createElement('div');
+			overlay.className = 'insta-post-link full-link';
+			overlay.setAttribute('role', 'button');
+			overlay.tabIndex = 0;
+			// on click advance to next image (do not open the image in a new tab)
+			overlay.addEventListener('click', function(e) { e.stopPropagation(); e.preventDefault(); try { next(); } catch(err) {} resetTimer(); });
+			// keyboard accessibility: Enter / Space to trigger next
+			overlay.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); try { next(); } catch(err) {} resetTimer(); } });
+			imageEl.appendChild(overlay);
+		}
+
+		// Append the new image below the overlay (images have z-index:1, overlay z-index:2)
+		imageEl.appendChild(newImg);
+
+		// Once image loads, fade it in and remove the previous image after transition
+		const safeFadeIn = () => {
+			// force reflow
+			void newImg.offsetWidth;
+			newImg.style.opacity = '1';
+
+			// find previous images (exclude the new one) and fade them out then remove
+			const oldImages = Array.from(imageEl.querySelectorAll('img.insta-img')).filter(img => img !== newImg);
+			oldImages.forEach(oldImg => {
+				oldImg.style.opacity = '0';
+				// remove after transition ends
+				const onEnd = (e) => { if (e.propertyName === 'opacity') { oldImg.removeEventListener('transitionend', onEnd); try{ oldImg.remove(); } catch(e){} } };
+				oldImg.addEventListener('transitionend', onEnd);
+				// fallback: remove after 600ms if transitionend doesn't fire
+				setTimeout(() => { if (oldImg.parentNode) oldImg.remove(); }, 700);
+			});
+		};
+
+		if (newImg.complete) {
+			safeFadeIn();
+		} else {
+			newImg.addEventListener('load', safeFadeIn);
+			newImg.addEventListener('error', () => { /* on error, still try to remove old images */ safeFadeIn(); });
+		}
 	}
 
 	function next() { show(idx + 1); }
@@ -526,9 +549,70 @@ ensureThree(function initGreenSmoke() {
 		startTimer();
 	}
 
-	// initialize
-	show(0);
-	startTimer();
+	function initInsta(arr) {
+		images = arr || [];
+		if (!images || images.length === 0) {
+			// Fallback to a single placeholder if manifest missing
+			images = ['assets/insta/IMG_0438.jpg'];
+		}
+		show(0);
+		startTimer();
+	}
+
+	// Try to load a manifest that lists image filenames inside `assets/insta`
+	fetch('assets/insta/manifest.json')
+		.then(r => r.ok ? r.json() : Promise.reject('manifest not found'))
+		.then(j => {
+			if (j && Array.isArray(j.files)) {
+				const arr = j.files.map(f => `assets/insta/${f}`);
+				initInsta(arr);
+			} else {
+				initInsta();
+			}
+		})
+		.catch(err => {
+			console.warn('Could not load insta manifest, falling back to default images', err);
+			// fallback: try to load a small set of embedded images if available
+			initInsta([ 'assets/insta/IMG_0438.jpg' ]);
+		});
+
+	// Mobile: enable swipe gestures on the image element to navigate slideshow
+	(function enableInstaSwipe(){
+		let touchStartX = 0;
+		let touchStartY = 0;
+		let touchDeltaX = 0;
+		const minSwipe = 40; // minimum px to consider a swipe
+		if (!imageEl) return;
+		imageEl.addEventListener('touchstart', function(e){
+			if (!e.touches || e.touches.length !== 1) return;
+			touchStartX = e.touches[0].clientX;
+			touchStartY = e.touches[0].clientY;
+			touchDeltaX = 0;
+		}, { passive: true });
+
+		imageEl.addEventListener('touchmove', function(e){
+			if (!e.touches || e.touches.length !== 1) return;
+			touchDeltaX = e.touches[0].clientX - touchStartX;
+		}, { passive: true });
+
+		imageEl.addEventListener('touchend', function(e){
+			// Use changedTouches as final reference
+			const endY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : touchStartY;
+			const deltaY = Math.abs(endY - touchStartY);
+			// horizontal swipe must dominate vertical movement
+			if (Math.abs(touchDeltaX) > minSwipe && Math.abs(touchDeltaX) > deltaY) {
+				if (touchDeltaX < 0) {
+					// swipe left => next
+					try { next(); } catch(err) {}
+				} else {
+					// swipe right => prev
+					try { prev(); } catch(err) {}
+				}
+				resetTimer();
+			}
+			touchDeltaX = 0;
+		}, { passive: true });
+	})();
 
 	// Lazy load YouTube & Twitch on visibility to reduce initial requests
 	const io = new IntersectionObserver(entries => {
@@ -536,7 +620,12 @@ ensureThree(function initGreenSmoke() {
 			if (!entry.isIntersecting) return;
 			const ifr = entry.target.querySelector('iframe.embed-iframe');
 			if (ifr && ifr.dataset && !ifr.dataset.loaded) {
-				// nothing to change as src already set; mark as loaded
+				// If iframe uses a lazy `data-src`, assign it to `src` when the option becomes visible.
+				// Some code paths previously only set `data-loaded` which prevented later code from
+				// actually assigning `src` (causing embedded players to stay blank).
+				if (ifr.dataset.src && !ifr.src) {
+					try { ifr.src = ifr.dataset.src; } catch (e) { /* ignore */ }
+				}
 				ifr.dataset.loaded = '1';
 			}
 		});
@@ -598,46 +687,60 @@ ensureThree(function initGreenSmoke() {
 				ifr.dataset.loaded = '1';
 			}
 		});
-		// If this is the YouTube option, set up a simple test playlist controller
+		// Initialize YouTube IFrame API for playlist controls
 		if (opt.dataset.type === 'youtube') {
-			setupTestYouTubePlaylist(opt);
+			const iframe = opt.querySelector('iframe.youtube-embed');
+			if (iframe) {
+				initYouTubeForIframe(iframe, opt);
+			}
 		}
 	}
 
 	function derivePlatformLink(opt) {
 		if (!opt) return null;
-		// try to find an iframe with a data-src and convert to a user-facing URL
-		const iframe = opt.querySelector('iframe[data-src]');
-		if (iframe && iframe.dataset && iframe.dataset.src) {
-			const src = iframe.dataset.src;
+		// 1) prefer explicit data-type mapping (most reliable)
+		const typ = (opt.dataset.type || '').toLowerCase();
+		if (typ) {
+			switch(typ) {
+				case 'twitch': return { href: 'https://twitch.tv/cook14u', platform: 'twitch' };
+				case 'youtube': return { href: 'https://www.youtube.com/@Cook14u', platform: 'youtube' };
+				case 'instagram': return { href: 'https://www.instagram.com/cook14u2/', platform: 'instagram' };
+				case 'rumble': return { href: 'https://rumble.com/user/Cook14u', platform: 'rumble' };
+				case 'tiktok': return { href: 'https://www.tiktok.com/@Cook14U', platform: 'tiktok' };
+				default: break;
+			}
+		}
+
+		// 2) try to inspect any iframe present for data-src or src
+		const iframe = opt.querySelector('iframe');
+		if (iframe) {
+			const src = (iframe.dataset && iframe.dataset.src) || iframe.src || '';
 			try {
 				if (src.includes('player.twitch.tv') || src.includes('twitch.tv')) {
 					const m = src.match(/[?&]channel=([^&]+)/);
 					const channel = m ? decodeURIComponent(m[1]) : 'cook14u';
 					return { href: `https://twitch.tv/${channel}`, platform: 'twitch' };
 				}
-				if (src.includes('youtube.com')) {
-					const m = src.match(/[?&]list=([^&]+)/);
-					if (m) return { href: `https://www.youtube.com/playlist?list=${m[1]}`, platform: 'youtube' };
-					// fallback to channel/home
-					return { href: 'https://www.youtube.com', platform: 'youtube' };
+				if (src.includes('youtube.com') || src.includes('youtube-nocookie.com')) {
+					return { href: 'https://www.youtube.com/@Cook14u', platform: 'youtube' };
 				}
-				if (src.includes('twitframe.com') || src.includes('x.com')) {
-					// treat legacy X embeds as TikTok replacement (show TikTok profile instead)
-					// Prefer returning a TikTok profile URL for the Cook14U handle.
+				if (src.includes('rumble.com')) {
+					return { href: 'https://rumble.com/user/Cook14u', platform: 'rumble' };
+				}
+				if (src.includes('tiktok.com')) {
 					return { href: 'https://www.tiktok.com/@Cook14U', platform: 'tiktok' };
 				}
 			} catch (e) { /* fall through */ }
 		}
-		// special-case based on data-type attribute
-		const typ = opt.dataset.type;
-		switch(typ) {
-			case 'twitch': return { href: 'https://twitch.tv/cook14u', platform: 'twitch' };
-			case 'youtube': return { href: 'https://www.youtube.com/@Cook14u', platform: 'youtube' };
-			case 'instagram': return { href: 'https://www.instagram.com/cook14u2/', platform: 'instagram' };
-			case 'tiktok': return { href: 'https://www.tiktok.com/@Cook14U', platform: 'tiktok' };
-			default: return null;
-		}
+
+		// 3) heuristics based on embed class names or inner labels
+		if (opt.querySelector('.youtube-embed') || opt.classList.contains('youtube')) return { href: 'https://www.youtube.com/@Cook14u', platform: 'youtube' };
+		if (opt.querySelector('.twitch-embed') || opt.classList.contains('twitch')) return { href: 'https://twitch.tv/cook14u', platform: 'twitch' };
+		if (opt.querySelector('.rumble-embed') || opt.classList.contains('rumble')) return { href: 'https://rumble.com/user/Cook14u', platform: 'rumble' };
+		if (opt.querySelector('.insta-slideshow') || opt.dataset.type === 'instagram') return { href: 'https://www.instagram.com/cook14u2/', platform: 'instagram' };
+
+		// 4) give up
+		return null;
 	}
 
 	function updateContentLinkForOption(opt) {
@@ -771,25 +874,60 @@ function initYouTubeForIframe(iframe, optionEl) {
 		// ensure iframe has an id
 		if (!iframe.id) iframe.id = 'yt-' + Math.random().toString(36).slice(2);
 
-		// create player (this will replace the iframe with a YT player instance)
-		youtubePlayer = new YT.Player(iframe.id, {
+		// Extract playlist config from data-src to ensure API picks it up correctly
+		const src = iframe.dataset.src || "";
+		const listMatch = src.match(/[?&]list=([^&]+)/);
+		
+		const playerConfig = {
 			events: {
 				onReady: function(event) {
-					// autoplay disabled by default; you can call playVideo() if desired
+					// Restore classes if lost during replacement
+					const playerIf = event.target.getIframe();
+					if (playerIf) {
+						playerIf.classList.add('embed-iframe', 'youtube-embed');
+					}
 				}
 			}
-		});
+		};
+
+		// If we found a list ID, explicitly configure the player for it
+		// This fixes issues where the API doesn't pick up the playlist from the iframe src
+		if (listMatch) {
+			playerConfig.playerVars = {
+				listType: 'playlist',
+				list: listMatch[1],
+				autoplay: 0,
+				rel: 0,
+				modestbranding: 1,
+				playsinline: 1
+			};
+		}
+
+		// create player (this will replace the iframe with a YT player instance)
+		youtubePlayer = new YT.Player(iframe.id, playerConfig);
 		youtubeCurrentIframe = iframe;
 
 		// wire prev/next buttons once
 		const prev = optionEl.querySelector('.yt-prev');
 		const next = optionEl.querySelector('.yt-next');
 		if (prev && !prev.dataset.bound) {
-			prev.addEventListener('click', function(e) { e.stopPropagation(); e.preventDefault(); if (youtubePlayer && youtubePlayer.previousVideo) youtubePlayer.previousVideo(); });
+			prev.addEventListener('click', function(e) { 
+				e.stopPropagation(); 
+				e.preventDefault(); 
+				if (youtubePlayer && typeof youtubePlayer.previousVideo === 'function') {
+					youtubePlayer.previousVideo(); 
+				}
+			});
 			prev.dataset.bound = '1';
 		}
 		if (next && !next.dataset.bound) {
-			next.addEventListener('click', function(e) { e.stopPropagation(); e.preventDefault(); if (youtubePlayer && youtubePlayer.nextVideo) youtubePlayer.nextVideo(); });
+			next.addEventListener('click', function(e) { 
+				e.stopPropagation(); 
+				e.preventDefault(); 
+				if (youtubePlayer && typeof youtubePlayer.nextVideo === 'function') {
+					youtubePlayer.nextVideo(); 
+				}
+			});
 			next.dataset.bound = '1';
 		}
 
@@ -799,37 +937,14 @@ function initYouTubeForIframe(iframe, optionEl) {
 	});
 }
 
-// Lightweight test playlist for the YouTube option (uses plain embed URLs)
-function setupTestYouTubePlaylist(optionEl) {
-	const vids = ['_s7S_WybcRM','rc40cT5XKuI']; // removed middle video per user request
-	const iframe = optionEl.querySelector('iframe.youtube-embed');
-	if (!iframe) return;
-
-	// initialize index
-	if (!iframe.dataset.playIndex) iframe.dataset.playIndex = '0';
-
-	function updateSrc() {
-		const idx = parseInt(iframe.dataset.playIndex || '0', 10) % vids.length;
-		const id = vids[(idx + vids.length) % vids.length];
-		iframe.src = `https://www.youtube.com/embed/${id}?rel=0&autoplay=0&enablejsapi=0`;
-		iframe.dataset.loaded = '1';
-	}
-
-	// wire prev/next buttons to cycle through the test list
-	const prev = optionEl.querySelector('.yt-prev');
-	const next = optionEl.querySelector('.yt-next');
-	if (prev && !prev.dataset.boundPlaylist) {
-		prev.addEventListener('click', function(e){ e.stopPropagation(); e.preventDefault(); let i = parseInt(iframe.dataset.playIndex||'0',10); i = (i - 1 + vids.length) % vids.length; iframe.dataset.playIndex = String(i); updateSrc(); });
-		prev.dataset.boundPlaylist = '1';
-	}
-	if (next && !next.dataset.boundPlaylist) {
-		next.addEventListener('click', function(e){ e.stopPropagation(); e.preventDefault(); let i = parseInt(iframe.dataset.playIndex||'0',10); i = (i + 1) % vids.length; iframe.dataset.playIndex = String(i); updateSrc(); });
-		next.dataset.boundPlaylist = '1';
-	}
-
-	// always set initial test src (override any placeholder playlist) and mark loaded
-	updateSrc();
-}
+// DEPRECATED: No longer needed - YouTube card now uses native playlist embed
+// The playlist ID is set directly in the iframe data-src in index.html
+// function setupTestYouTubePlaylist(optionEl) {
+// 	const vids = ['_s7S_WybcRM','rc40cT5XKuI'];
+// 	const iframe = optionEl.querySelector('iframe.youtube-embed');
+// 	if (!iframe) return;
+// 	// ... (commented out for reference)
+// }
 
 	// Modal click inspector (optional) - enable by adding ?debug_modals=1 to the URL
 	(function modalClickInspector() {
@@ -1159,32 +1274,27 @@ function setupTestYouTubePlaylist(optionEl) {
 	// Initialize when DOM is ready (ensures .home-overlay exists)
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLeftLines); else initLeftLines();
 
-	/* Live indicator behaviour: check Twitch live status (best-effort) and wire click actions
+	/* Live indicator behaviour: check Twitch live status using official API
 	   - left-click: when live -> open twitch content panel; when offline -> scroll to Discord/community
 	   - context menu (right-click) toggles a manual force-live override for testing (stored in localStorage)
-	   Note: the live-check uses a public endpoint where possible; if unavailable the indicator falls back to manual override.
 	*/
 	(function liveIndicatorController(){
 		const btn = document.getElementById('live-indicator');
 		if (!btn) return;
-		let forced = localStorage.getItem('cook14u_force_live') === '1';
+
+		// Twitch API Credentials
+		// WARNING: Storing Client Secret in client-side code is insecure as it is visible to anyone inspecting the source.
+		// Ideally, this should be handled by a backend proxy. Proceeding as requested for static site.
+		const CLIENT_ID = '7a57wo4g9h61fnxr8td9dmnibkjr2b';
+		const CLIENT_SECRET = 'lhdr67w4klu9jvnjb64m6p0d65xf6x';
+		const CHANNEL_NAME = 'cook14u';
+
+		let forced = sessionStorage.getItem('cook14u_force_live') === '1';
 		let isLive = false;
+		let cachedUserId = localStorage.getItem('cook14u_twitch_userid');
 
 		// Demo toggle button (temporary): wire a small visible toggle to force live state for testing
-		const demoBtn = document.getElementById('demo-live-toggle');
-		if (demoBtn) {
-			// show the demo button (it's hidden by default in HTML to avoid accidental production exposure)
-			demoBtn.style.display = 'inline-flex';
-			demoBtn.classList.toggle('active', forced);
-			demoBtn.textContent = forced ? 'Demo: ON' : 'Demo: OFF';
-			demoBtn.addEventListener('click', function(e){
-				forced = !forced;
-				if (forced) localStorage.setItem('cook14u_force_live','1'); else localStorage.removeItem('cook14u_force_live');
-				demoBtn.classList.toggle('active', forced);
-				demoBtn.textContent = forced ? 'Demo: ON' : 'Demo: OFF';
-				checkNow();
-			});
-		}
+		// demo button removed from DOM; use sessionStorage for non-persistent force override
 
 		function setLive(v){
 			isLive = !!v;
@@ -1193,6 +1303,10 @@ function setupTestYouTubePlaylist(optionEl) {
 			// Use translation helper if available
 			btn.title = isLive ? t('live_online_title', 'Cook14U is LIVE — click to open Twitch') : t('live_offline_title', 'Offline — click to open Discord (or open community)');
 		}
+
+		// Initialize UI to a deterministic state: respect manual forced override if present (session only),
+		// otherwise show offline until the live check runs.
+		if (forced) setLive(true); else setLive(false);
 
 		function openTwitchOption(){
 			const twitchOpt = document.querySelector('.option[data-type="twitch"]');
@@ -1223,24 +1337,132 @@ function setupTestYouTubePlaylist(optionEl) {
 			if (isLive) openTwitchOption(); else openDiscordSection();
 		});
 
-		// right-click toggles manual override (for testing)
+		// right-click toggles manual override (for testing) — stored in sessionStorage so it's not persistent across browser sessions
 		btn.addEventListener('contextmenu', function(e){
 			e.preventDefault();
 			forced = !forced;
-			if (forced) localStorage.setItem('cook14u_force_live','1'); else localStorage.removeItem('cook14u_force_live');
+			if (forced) sessionStorage.setItem('cook14u_force_live','1'); else sessionStorage.removeItem('cook14u_force_live');
 			checkNow();
 		});
 
-		async function checkNow(){
-			// forced override always shows live
-			if (forced) { setLive(true); return; }
+		async function getAccessToken() {
+			let token = localStorage.getItem('cook14u_twitch_token');
+			let expiry = localStorage.getItem('cook14u_twitch_expiry');
+			
+			if (token && expiry && Date.now() < parseInt(expiry)) {
+				return token;
+			}
 
 			try {
-				// best-effort public status check. This endpoint is unauthenticated and may change
-				const resp = await fetch('https://decapi.me/twitch/stream/cook14u');
-				const txt = (await resp.text()).toLowerCase();
-				const live = txt.includes('live') || txt.includes('true') || txt.includes('online') || txt.includes('streaming');
+				const response = await fetch('https://id.twitch.tv/oauth2/token', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: `client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`
+				});
+				const data = await response.json();
+				if (data.access_token) {
+					localStorage.setItem('cook14u_twitch_token', data.access_token);
+					localStorage.setItem('cook14u_twitch_expiry', Date.now() + (data.expires_in * 1000));
+					return data.access_token;
+				}
+			} catch (e) {
+				console.error('Failed to get Twitch token', e);
+			}
+			return null;
+		}
+
+		async function getUserId(token) {
+			if (cachedUserId) return cachedUserId;
+			try {
+				const response = await fetch(`https://api.twitch.tv/helix/users?login=${CHANNEL_NAME}`, {
+					headers: { 'Client-Id': CLIENT_ID, 'Authorization': `Bearer ${token}` }
+				});
+				const data = await response.json();
+				if (data.data && data.data.length > 0) {
+					cachedUserId = data.data[0].id;
+					localStorage.setItem('cook14u_twitch_userid', cachedUserId);
+					return cachedUserId;
+				}
+			} catch (e) {
+				console.error('Failed to get User ID', e);
+			}
+			return null;
+		}
+
+		function updateTwitchEmbed(type, id) {
+			const twitchOpt = document.querySelector('.option[data-type="twitch"]');
+			if (!twitchOpt) return;
+			const iframe = twitchOpt.querySelector('iframe');
+			if (!iframe) return;
+
+			const hostname = window.location.hostname || 'localhost';
+			// Add common parents to support local dev and github pages
+			const parents = `parent=${hostname}&parent=cook14u.github.io&parent=127.0.0.1`;
+			
+			let newSrc = '';
+			if (type === 'live') {
+				newSrc = `https://player.twitch.tv/?channel=${CHANNEL_NAME}&${parents}&muted=false`;
+			} else if (type === 'video') {
+				newSrc = `https://player.twitch.tv/?video=${id}&${parents}&muted=false`;
+			}
+
+			// Update data-src so lazy loader picks it up
+			iframe.dataset.src = newSrc;
+			
+			// If already loaded or active, update immediately
+			if (iframe.dataset.loaded === '1' || twitchOpt.classList.contains('active')) {
+				// Only update src if it's different to avoid reload
+				if (iframe.src !== newSrc) {
+					iframe.src = newSrc;
+					iframe.dataset.loaded = '1';
+				}
+			}
+		}
+
+		async function checkNow(){
+			// forced override always shows live
+			if (forced) { 
+				setLive(true); 
+				updateTwitchEmbed('live');
+				return; 
+			}
+
+			const token = await getAccessToken();
+			if (!token) {
+				console.warn('Could not obtain Twitch token');
+				// ensure UI reflects offline when token can't be fetched
+				setLive(false);
+				return;
+			}
+
+			const userId = await getUserId(token);
+			if (!userId) {
+				setLive(false);
+				return;
+			}
+
+			try {
+				// Check Stream
+				const streamResp = await fetch(`https://api.twitch.tv/helix/streams?user_id=${userId}`, {
+					headers: { 'Client-Id': CLIENT_ID, 'Authorization': `Bearer ${token}` }
+				});
+				const streamData = await streamResp.json();
+				
+				const live = streamData.data && streamData.data.length > 0;
 				setLive(live);
+
+				if (live) {
+					updateTwitchEmbed('live');
+				} else {
+					// Fetch latest video (VOD)
+					const videoResp = await fetch(`https://api.twitch.tv/helix/videos?user_id=${userId}&first=1&sort=time`, {
+						headers: { 'Client-Id': CLIENT_ID, 'Authorization': `Bearer ${token}` }
+					});
+					const videoData = await videoResp.json();
+					if (videoData.data && videoData.data.length > 0) {
+						updateTwitchEmbed('video', videoData.data[0].id);
+					}
+				}
 			} catch (err) {
 				// network or endpoint failed — assume offline but keep manual override available
 				console.warn('Live check failed', err);

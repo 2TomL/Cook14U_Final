@@ -27,8 +27,7 @@
 			<button id="live-indicator" class="live-indicator" aria-label="Live status" title="Live status">
 				<img src="assets/video-camera.png" alt="Live" width="28" height="28" decoding="async" />
 			</button>
-			<!-- Demo toggle (temporary) - toggles the forced live override for visual testing -->
-			<button id="demo-live-toggle" class="demo-toggle" aria-label="Toggle demo live" title="Toggle demo live">Demo</button>
+
 			<!-- Language switcher -->
 			<button id="lang-toggle" class="lang-toggle" aria-label="Language" title="Change language">EN</button>
 			<button class="hamburger-menu" id="hamburger-menu" aria-label="Menu">
@@ -92,6 +91,7 @@ and Gaming</p>
 					<iframe class="embed-iframe twitch-embed" data-src="https://player.twitch.tv/?channel=cook14u&parent=localhost" frameborder="0" allowfullscreen="true" scrolling="no" title="Twitch Player"></iframe>
 				</div>
 			</div>
+
 			<div class="option" data-type="youtube">
 				<div class="shadow"></div>
 					<div class="label">
@@ -101,15 +101,15 @@ and Gaming</p>
 						<div class="sub">Playlist slideshow</div>
 					</div>
 				</div>
-				<div class="panel">
-					<button class="option-close" aria-label="Close">✕</button>
-					<!-- Replace PLAYLIST_ID with the desired playlist id; keep enablejsapi=1 for controls to work -->
-					<iframe id="youtube-player-iframe" class="embed-iframe youtube-embed" data-src="https://www.youtube.com/embed?listType=playlist&list=PLAYLIST_ID&autoplay=0&rel=0&enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen title="YouTube Playlist"></iframe>
-					<div class="yt-controls">
-						<button class="yt-prev" aria-label="Previous">◀</button>
-						<button class="yt-next" aria-label="Next">▶</button>
-					</div>
+			<div class="panel">
+				<button class="option-close" aria-label="Close">✕</button>
+				<!-- YouTube playlist: PLiTMPYv3qvSazAK3SIEj3QYuxX2ds2ouI - automatically includes new videos added to the playlist -->
+				<iframe id="youtube-player-iframe" class="embed-iframe youtube-embed" data-src="https://www.youtube.com/embed/videoseries?list=PLiTMPYv3qvSazAK3SIEj3QYuxX2ds2ouI&autoplay=0&rel=0&enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen title="YouTube Playlist"></iframe>
+				<div class="yt-controls">
+					<button class="yt-prev" aria-label="Previous">◀</button>
+					<button class="yt-next" aria-label="Next">▶</button>
 				</div>
+			</div>
 			</div>
 
 			<div class="option" data-type="instagram">
@@ -118,7 +118,6 @@ and Gaming</p>
 						<div class="icon"><img src="assets/insta_tr_icon.png" alt="Instagram" class="option-icon" width="72" height="72" decoding="async"/></div>
 					<div class="info">
 						<div class="main">Instagram</div>
-						<div class="sub">Selected feed</div>
 					</div>
 				</div>
 				<div class="panel insta-panel">
@@ -133,18 +132,18 @@ and Gaming</p>
 				</div>
 			</div>
 
-			<div class="option" data-type="tiktok">
+			<div class="option" data-type="rumble">
 				<div class="shadow"></div>
 				<div class="label">
-						<div class="icon"><img src="assets/insta_tr_icon.png" alt="TikTok" class="option-icon" width="72" height="72" decoding="async"/></div>
+						<div class="icon"><img src="assets/rumble.png" alt="Rumble" class="option-icon" width="72" height="72" decoding="async"/></div>
 					<div class="info">
-						<div class="main">TikTok Feed</div>
+						<div class="main">Rumble</div>
 						<div class="sub">Latest posts</div>
 					</div>
 				</div>
 				<div class="panel">
 					<button class="option-close" aria-label="Close">✕</button>
-					<iframe class="embed-iframe tiktok-embed" data-src="https://www.tiktok.com/@Cook14U" frameborder="0" allowfullscreen title="TikTok Feed"></iframe>
+					<iframe class="embed-iframe rumble-embed" data-src="https://rumble.com/user/Cook14u" frameborder="0" allowfullscreen title="Rumble Feed"></iframe>
 				</div>
 			</div>
 		</div>
@@ -182,10 +181,11 @@ and Gaming</p>
 					<span class="frame-badge">Discord</span>
 				</div>
 				<div class="frame-body">
-					<p class="muted">Below is a live Discord server embed. Replace <code>YOUR_SERVER_ID</code> in the iframe's <code>data-src</code> attribute with your server id and enable the Server Widget in Discord server settings.</p>
-					<!-- Discord widget is lazy-loaded. Replace YOUR_SERVER_ID with the actual server id -->
+					<p class="muted">Below is the live Cook14U Discord widget. If the widget does not appear, make sure "Server Widget" is enabled in your Discord Server Settings (Server Settings → Widget) and disable any ad‑blockers or tracking protection.</p>
+					<!-- Discord widget is lazy-loaded; direct `src` is set so it should load. -->
 					<div class="discord-embed-wrap">
-						<iframe class="embed-iframe discord-embed" data-src="https://discord.com/widget?id=YOUR_SERVER_ID&theme=dark" title="Cook14U Discord" frameborder="0" allowtransparency="true" sandbox="allow-scripts allow-same-origin"></iframe>
+						<iframe class="embed-iframe discord-embed" data-src="https://discord.com/widget?id=842437277594026045&channel=842437278252269629&theme=dark" src="https://discord.com/widget?id=842437277594026045&channel=842437278252269629&theme=dark" title="Cook14U Discord" frameborder="0" allowtransparency="true" sandbox="allow-scripts allow-same-origin"></iframe>
+						<div class="discord-fallback muted" style="padding:8px 12px; text-align:center;">Can't see the embed? Open the channel directly on Discord: <a href="https://discord.com/channels/842437277594026045/842437278252269629" target="_blank" rel="noopener">Open channel on Discord</a>.</div>
 					</div>
 					</div>
 				</div>
