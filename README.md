@@ -10,6 +10,13 @@
 - **Style Reversion:** Reverted the heavy engraved/glow style on the hero subtitle (`.home-subtext`) back to a simpler style.
 - **I18n:** Added client-side i18n support and a language toggle (English / Spanish).
 
+## Recent changes (2025-11-26)
+
+- **Merch buy-station:** Added a clickable merch button that links to an external shop. The button uses a hover-only animated glow that follows the PNG's alpha (drop-shadow) and removes the focus glow after click to avoid persisting state.
+- **Mobile card layout:** Improved mobile behavior for content cards: closed cards center icons, icons normalized in size, and opened cards nudge the embedded video and lift the platform icon for better visual balance.
+- **Polish & accessibility:** Removed an always-visible demo toggle, kept a right-click session-only live override, and added small JS fixes to clear persistent focus after interaction.
+
+
 This repository contains the static frontend for the Cook14U site: a small, stylized Warzone-inspired landing page with live-stream indicator, content cards, and lightweight WebGL visual effects.
 
 **Quick Summary**
@@ -57,17 +64,5 @@ This repository contains the static frontend for the Cook14U site: a small, styl
 
 - Theme color: `--seahawks-blue-rgb` in `style.css`.
 - Twitch Credentials: Update `CLIENT_ID` and `CLIENT_SECRET` in `script.js` if they change.
-
-**Local preview**
-
-1. Serve files from a static server (recommended) or open `index.html` directly in a browser.
-   - Quick PowerShell static server (requires Python):
-
-```powershell
-cd 'c:\Users\lamer\OneDrive\Desktop\Cook14u.Final'
-python -m http.server 8000
-# then open http://localhost:8000 in your browser
-```
-
 **Credits**
 - Built and styled for the Cook14U project by Tom Lamers.
