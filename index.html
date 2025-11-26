@@ -25,7 +25,7 @@
 			</a>
 			<!-- Live indicator: shows camera icon; when live animated background appears -->
 			<button id="live-indicator" class="live-indicator" aria-label="Live status" title="Live status">
-				<img src="assets/video-camera.png" alt="Live" width="28" height="28" decoding="async" />
+				<img src="assets/video-camera.png" alt="Live" width="28" height="28" decoding="async" loading="lazy" />
 			</button>
 
 			<!-- Language switcher -->
@@ -47,12 +47,17 @@
 	<section id="home" class="section home-bg">
 		<div class="video-bg">
 			<div class="video-container">
-				<iframe id="youtube-video" data-src="https://www.youtube.com/embed/y0taddxYZmM?autoplay=1&mute=1&loop=1&playlist=y0taddxYZmM&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen title="Background Video" aria-hidden="true"></iframe>
+				<!-- Intro video (desktop only): plays once on first visit, muted so browsers allow autoplay -->
+				<video id="intro-video" class="hero-intro-video" muted playsinline preload="auto" aria-hidden="true">
+					<source src="assets/Mikey.mp4" type="video/mp4">
+					<!-- fallback text -->
+				</video>
+				<iframe id="youtube-video" data-src="https://www.youtube.com/embed/rc40cT5XKuI?autoplay=1&mute=1&loop=1&playlist=rc40cT5XKuI&controls=0&rel=0&modestbranding=1&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen title="Background Video" aria-hidden="true"></iframe>
 			</div>
 		</div>
 		<div class="home-overlay">
 			<div class="home-photo-bg">
-				<img src="assets/hole in wall1.png" alt="Home Photo" class="home-photo-full" width="1600" height="900" decoding="async" />
+				<img src="assets/hole in wall1.png" alt="Home Photo" class="home-photo-full" width="1600" height="900" decoding="async" loading="lazy" />
 			</div>
 			<div class="logo-fire-container">
 				<div class="fire-effect-container">
@@ -62,11 +67,10 @@
 			</div>
 			<div class="home-text">
 				<p class="home-subtext compact-lines">Welcome to the community!<br>
-please Join us for <br>
-Yappin<br>
-Banter<br>
-and Gaming</p>
-			</div>
+					please Join us for <br>
+					Yappin<br>
+					Banter<br>
+					and Gaming</p>
 			</div>
 		</div>
 	</section>
@@ -79,7 +83,7 @@ and Gaming</p>
 			<div class="option active" data-type="twitch">
 				<div class="shadow"></div>
 				<div class="label">
-					<div class="icon"><img src="assets/twitch_tr_icon.png" alt="Twitch" class="option-icon" width="72" height="72" decoding="async"/></div>
+						<div class="icon"><img src="assets/twitch_tr_icon.png" alt="Twitch" class="option-icon" width="72" height="72" decoding="async" loading="lazy"/></div>
 					<div class="info">
 						<div class="main">Twitch Live</div>
 						<div class="sub">Live stream</div>
@@ -95,7 +99,7 @@ and Gaming</p>
 			<div class="option" data-type="youtube">
 				<div class="shadow"></div>
 					<div class="label">
-						<div class="icon"><img src="assets/yt_tr_icon.png" alt="YouTube" class="option-icon" width="72" height="72" decoding="async"/></div>
+						<div class="icon"><img src="assets/yt_tr_icon.png" alt="YouTube" class="option-icon" width="72" height="72" decoding="async" loading="lazy"/></div>
 					<div class="info">
 						<div class="main">YouTube Playlist</div>
 						<div class="sub">Playlist slideshow</div>
@@ -115,7 +119,7 @@ and Gaming</p>
 			<div class="option" data-type="instagram">
 				<div class="shadow"></div>
 					<div class="label">
-						<div class="icon"><img src="assets/insta_tr_icon.png" alt="Instagram" class="option-icon" width="72" height="72" decoding="async"/></div>
+						<div class="icon"><img src="assets/insta_tr_icon.png" alt="Instagram" class="option-icon" width="72" height="72" decoding="async" loading="lazy"/></div>
 					<div class="info">
 						<div class="main">Instagram</div>
 					</div>
@@ -135,7 +139,7 @@ and Gaming</p>
 			<div class="option" data-type="rumble">
 				<div class="shadow"></div>
 				<div class="label">
-						<div class="icon"><img src="assets/rumble.png" alt="Rumble" class="option-icon" width="72" height="72" decoding="async"/></div>
+						<div class="icon"><img src="assets/rumble.png" alt="Rumble" class="option-icon" width="72" height="72" decoding="async" loading="lazy"/></div>
 					<div class="info">
 						<div class="main">Rumble</div>
 						<div class="sub">Latest posts</div>
@@ -158,7 +162,7 @@ and Gaming</p>
 			<div class="wz-frame">
 				<div class="about-inner">
 					<div class="about-left">
-						<img src="assets/about1.png" alt="About Photo" width="420" height="280" decoding="async" />
+						<img src="assets/about1.png" alt="About Photo" width="420" height="280" decoding="async" loading="lazy" />
 					</div>
 					<div class="about-right">
 						<div class="about-card">
@@ -185,7 +189,7 @@ and Gaming</p>
 					<!-- Discord widget is lazy-loaded; direct `src` is set so it should load. -->
 					<div class="discord-embed-wrap">
 						<iframe class="embed-iframe discord-embed" data-src="https://discord.com/widget?id=842437277594026045&channel=842437278252269629&theme=dark" src="https://discord.com/widget?id=842437277594026045&channel=842437278252269629&theme=dark" title="Cook14U Discord" frameborder="0" allowtransparency="true" sandbox="allow-scripts allow-same-origin"></iframe>
-						<div class="discord-fallback muted" style="padding:8px 12px; text-align:center;">Can't see the embed? Open the channel directly on Discord: <a href="https://discord.com/channels/842437277594026045/842437278252269629" target="_blank" rel="noopener">Open channel on Discord</a>.</div>
+						<div class="discord-fallback muted">Can't see the embed? Open the channel directly on Discord: <a href="https://discord.com/channels/842437277594026045/842437278252269629" target="_blank" rel="noopener">Open channel on Discord</a>.</div>
 					</div>
 					</div>
 				</div>
@@ -198,7 +202,7 @@ and Gaming</p>
 			<div class="merch-card" aria-live="polite">
 			<!-- Warzone-style buy station: clickable image that opens the merch store -->
 			<a class="merch-buystation" href="https://tinyurl.com/2t4a585a" target="_blank" rel="noopener noreferrer" aria-label="Open Cook14U merch store - opens in a new tab">
-				<img src="assets/merch.png" alt="Cook14U merch buy station" width="640" height="480" decoding="async"/>
+						<img src="assets/merch.png" alt="Cook14U merch buy station" width="640" height="480" decoding="async" loading="lazy"/>
 				<span class="merch-glow" aria-hidden="true"></span>
 			</a>
 			<div class="merch-text">
@@ -217,7 +221,7 @@ and Gaming</p>
 			</div>
 			<div class="setup-card setup-around">
 				<div class="media">
-					<img src="assets/PCsetup.png" alt="My Setup" width="260" height="260" decoding="async">
+						<img src="assets/PCsetup.png" alt="My Setup" width="260" height="260" decoding="async" loading="lazy">
 				</div>
 				<div class="specs specs-left">
 					<ul>
@@ -240,32 +244,32 @@ and Gaming</p>
 	<!-- Side tabs (right edge) -->
 	<div class="side-tabs" aria-hidden="false">
 		<button class="side-tab" id="codmunity-button" title="CODmunity">
-			<img src="assets/codmunity.png" alt="CODmunity" width="38" height="38" decoding="async">
+						<img src="assets/codmunity.png" alt="CODmunity" width="38" height="38" decoding="async" loading="lazy">
 		</button>
 		<button class="side-tab" id="wzmeta-button" title="WZ Stats">
-			<img src="assets/wzstats.png" alt="WZ Stats" width="38" height="38" decoding="async">
+						<img src="assets/wzstats.png" alt="WZ Stats" width="38" height="38" decoding="async" loading="lazy">
 		</button>
 		<button class="side-tab" id="tools-button" title="Tracker">
-			<img src="assets/tracker.png" alt="Tracker" width="38" height="38" decoding="async">
+						<img src="assets/tracker.png" alt="Tracker" width="38" height="38" decoding="async" loading="lazy">
 		</button>
 	</div>
 
     <!-- Mobile-side tabs: visible only on small screens; triggers the same modals as desktop side-tabs -->
 	<div class="mobile-side-tabs" aria-hidden="false">
 		<button class="mobile-tab" data-target="codmunity-button" title="CODmunity">
-			<img src="assets/codmunity.png" alt="CODmunity" width="36" height="36" decoding="async">
+						<img src="assets/codmunity.png" alt="CODmunity" width="36" height="36" decoding="async" loading="lazy">
 		</button>
 		<button class="mobile-tab" data-target="wzmeta-button" title="WZ Stats">
-			<img src="assets/wzstats.png" alt="WZ Stats" width="36" height="36" decoding="async">
+						<img src="assets/wzstats.png" alt="WZ Stats" width="36" height="36" decoding="async" loading="lazy">
 		</button>
 		<button class="mobile-tab" data-target="tools-button" title="Tracker">
-			<img src="assets/tracker.png" alt="Tracker" width="36" height="36" decoding="async">
+						<img src="assets/tracker.png" alt="Tracker" width="36" height="36" decoding="async" loading="lazy">
 		</button>
 	</div>
 
 	<!-- WZ floating app FAB (mobile) -->
 	<button id="wz-fab" class="wz-fab" aria-expanded="false" aria-label="Open WZ apps">
-		<img src="assets/WZapp_icon.png" alt="WZ apps" width="36" height="36" decoding="async">
+				<img src="assets/WZapp_icon.png" alt="WZ apps" width="36" height="36" decoding="async">
 	</button>
 
 
@@ -295,12 +299,8 @@ and Gaming</p>
 			<iframe src="https://codmunity.gg/app" width="100%" height="500" class="codmunity-iframe" title="CODmunity App"></iframe>
 		</div>
 	</div>
-
 	<script src="lang.js"></script>
 	<script src="script.js"></script>
-
-
-
 	<!-- Site footer -->
 	<footer class="site-footer" role="contentinfo">
 		<div class="footer-inner">Made by <a class="footer-link" href="https://2toml.github.io/TL_Final/" target="_blank" rel="noopener noreferrer">Tom Lamers</a> - 2025</div>

@@ -714,8 +714,20 @@ ensureThree(function initGreenSmoke() {
 			entries.forEach(entry => {
 				if (!entry.isIntersecting) return;
 				if (!hero.dataset.loaded) {
-					hero.src = hero.dataset.src;
-					hero.dataset.loaded = '1';
+					// If an intro video exists and we're on desktop, defer loading the hero
+					// so the intro can hand over and we can intentionally start the
+					// background video slightly later for timing control.
+					const introEl = document.getElementById('intro-video');
+					if (introEl && document.body.contains(introEl) && window.innerWidth > 900) {
+						// mark deferred so finishIntro can decide when to actually load
+						hero.dataset.deferred = '1';
+						return;
+					}
+					// Default path: append start=0 and load immediately
+					let src = hero.dataset.src || '';
+					if (!/[?&]start=/.test(src)) src += (src.indexOf('?') !== -1 ? '&' : '?') + 'start=0';
+					hero.src = src;
+					try { hero.dataset.loaded = '1'; } catch (e) {}
 				}
 				obs.disconnect();
 			});
@@ -871,6 +883,26 @@ ensureThree(function initGreenSmoke() {
 			updateContentLinkForOption(this);
 		});
 	});
+
+	// If all cards are closed, add a class on the container so we can style
+	// closed-card icons differently (larger) for better visibility.
+	function updateAllClosedClass() {
+		try {
+			const container = optionsContainer || document.querySelector('.options');
+			if (!container) return;
+			const anyActive = container.querySelector('.option.active');
+			if (anyActive) container.classList.remove('all-closed'); else container.classList.add('all-closed');
+		} catch (e) { /* non-fatal */ }
+	}
+
+	// Observe class changes on option elements to update state when cards open/close
+	try {
+		const observer = new MutationObserver(() => updateAllClosedClass());
+		options.forEach(o => observer.observe(o, { attributes: true, attributeFilter: ['class'] }));
+	} catch (e) { /* ignore if MutationObserver missing */ }
+
+	// Initial evaluation
+	updateAllClosedClass();
 
 	// close button handler (delegated) - closes active option and restores all cards
 	document.addEventListener('click', function(e) {
@@ -1557,9 +1589,44 @@ document.addEventListener('DOMContentLoaded', function(){
 		if (!intro || !hero) return;
 
 		// Ensure hero iframe will be loaded after the intro finishes (force-load if needed)
+		// Returns a Promise that resolves when the hero iframe has fired its `load` event
+		// or after a fallback timeout. This allows the intro hand-off to wait for
+		// the hero to be ready before crossfading, preventing visual jumps.
 		function loadHero() {
-			try { if (hero.dataset && hero.dataset.src && !hero.src) hero.src = hero.dataset.src; } catch (e) { }
+			return new Promise((resolve) => {
+				try {
+					if (hero.dataset && hero.dataset.src) {
+						let src = hero.dataset.src || '';
+						if (!/[?&]start=/.test(src)) src += (src.indexOf('?') !== -1 ? '&' : '?') + 'start=0';
+						// If src already set and marked loaded, resolve immediately
+						if (hero.src && hero.src === src && hero.dataset && hero.dataset.loaded === '1') {
+							try { delete hero.dataset.deferred; } catch (e) {}
+							return resolve();
+						}
+						// Handler to resolve once iframe emits load
+						let called = false;
+						function onLoadOnce() {
+							if (called) return; called = true;
+							try { hero.removeEventListener('load', onLoadOnce); } catch (e) {}
+							try { hero.dataset.loaded = '1'; } catch (e) {}
+							try { delete hero.dataset.deferred; } catch (e) {}
+							resolve();
+						}
+						// Attach load listener and assign src (this triggers load)
+						hero.addEventListener('load', onLoadOnce);
+						try { hero.src = src; } catch (e) { /* ignore */ }
+						// Fallback: if load doesn't fire, resolve after timeout
+						setTimeout(onLoadOnce, 1500);
+						return;
+					}
+				} catch (e) { /* fall through */ }
+				// Nothing to load; resolve immediately
+				resolve();
+			});
 		}
+
+		// How long to wait after the intro hands over before starting the hero video
+		const HERO_LOAD_DELAY_MS = 700; // configurable: increase to start hero later
 
 		// Smoke canvas helper: try to set opacity; observe DOM if smoke canvas created later
 		function setSmokeOpacity(val) {
@@ -1597,27 +1664,48 @@ document.addEventListener('DOMContentLoaded', function(){
 		// Common finish routine: fade out intro, reveal smoke and hero
 		function finishIntro() {
 			try {
-				loadHero();
-				// fade out intro
-				intro.style.transition = 'opacity 600ms ease';
-				intro.style.opacity = '0';
-				// remove after transition
-				setTimeout(() => { try { intro.remove(); } catch (e) {} }, 700);
-
-				// reveal hero quickly (start loading/playing)
-				setTimeout(() => { try { hero.style.opacity = '1'; } catch (e) {} }, 120);
-
-				// Trigger a dense smoke 'burst' then fade to subtle smoke — ensure hero has been started before the fade begins.
-				if (window.__cook14u_smokeController && typeof window.__cook14u_smokeController.burstThenFade === 'function') {
-					// start a short burst (burstOpacity, holdMs, targetOpacity, fadeMs)
-					// Wait a small delay to ensure the hero iframe was given its src and began loading
+				// If the hero load was deferred (intro present), wait for the hero to
+				// finish loading before we crossfade. This prevents a visual jump where
+				// the hero is assigned while the intro is fading out.
+				const shouldDefer = hero.dataset && hero.dataset.deferred;
+				if (shouldDefer) {
+					// Start loading after the configured delay, then wait for load before crossfade
 					setTimeout(() => {
-						try { window.__cook14u_smokeController.burstThenFade(1.0, 180, 0.22, 900); } catch (e) { setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450); }
-					}, 260);
+						loadHero().then(onceCrossfade).catch(onceCrossfade);
+					}, HERO_LOAD_DELAY_MS);
 				} else {
-					// fallback to DOM-based opacity changes (less accurate since material opacity remains constant)
-					setTimeout(() => { setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450); }, 260);
+					// No deferral: ensure hero is loaded (or already loaded) and then crossfade
+					loadHero().then(onceCrossfade).catch(onceCrossfade);
 				}
+				// Use smoother transitions that coordinate hero load and intro fade
+				intro.style.transition = 'opacity 900ms cubic-bezier(0.2,0.8,0.2,1)';
+				hero.style.transition = 'opacity 900ms cubic-bezier(0.2,0.8,0.2,1)';
+				intro.style.willChange = 'opacity';
+				hero.style.willChange = 'opacity';
+
+				const doCrossfade = function() {
+					// Reveal hero first, then fade intro slightly after for overlap
+					try { hero.style.opacity = '1'; } catch (e) {}
+					setTimeout(() => { try { intro.style.opacity = '0'; } catch (e) {} }, 80);
+
+					// remove intro after the crossfade completes
+					setTimeout(() => { try { intro.remove(); } catch (e) {} }, 1050);
+
+					// Trigger smoke burst timed with the crossfade
+					// start smoke a tiny bit later (1ms) to fine-tune timing
+					if (window.__cook14u_smokeController && typeof window.__cook14u_smokeController.burstThenFade === 'function') {
+						try { setTimeout(() => { window.__cook14u_smokeController.burstThenFade(1.0, 180, 0.22, 900); }, 1); }
+						catch (e) { setTimeout(() => { setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450); }, 1); }
+					} else {
+						setTimeout(() => { setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450); }, 1);
+					}
+				};
+
+				// If the hero iframe can signal load, wait for its load event (but fallback to timeout)
+				let did = false;
+				function onceCrossfade() { if (did) return; did = true; try { hero.removeEventListener('load', onceCrossfade); } catch (e) {} doCrossfade(); }
+
+				// Now handled by loadHero() promise above; nothing more to do here.
 			} catch (err) { console.warn('finishIntro error', err); }
 		}
 
@@ -1656,9 +1744,9 @@ document.addEventListener('DOMContentLoaded', function(){
 					try {
 						// trigger a dense burst and then fade to subtle smoke
 						if (window.__cook14u_smokeController && typeof window.__cook14u_smokeController.burstThenFade === 'function') {
-							window.__cook14u_smokeController.burstThenFade(1.0, 180, 0.22, 900);
+							setTimeout(() => { window.__cook14u_smokeController.burstThenFade(1.0, 180, 0.22, 900); }, 1);
 						} else {
-							setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450);
+							setTimeout(() => { setSmokeOpacity(1); setTimeout(() => setSmokeOpacity(0.25), 450); }, 1);
 						}
 					} catch (e) { console.warn('burst trigger failed', e); }
 				}, msUntilEnd);

@@ -1,7 +1,6 @@
 .home-logo {
 	display: block;
 	margin: 0;
-	/* slightly smaller than the previous bump for a balanced header */
 	max-width: 200px;
 	width: 18vw;
 	height: auto;
@@ -125,6 +124,9 @@
 	left: 0;
 	pointer-events: none;
 	border-radius: 18px;
+	/* smoother fade-in/fade-out when swapping with intro */
+	transition: opacity 900ms cubic-bezier(0.2,0.8,0.2,1);
+	will-change: opacity;
 }
 /* Intro hero video (desktop intro clip) */
 .hero-intro-video {
@@ -136,13 +138,17 @@
 	object-fit: cover;
 	border-radius: 18px;
 	z-index: 0; /* same stacking as background iframe so it's visible through transparent parts of the photo */
-	transition: opacity 600ms ease;
+	/* slightly longer crossfade for a smoother visual transition */
+	transition: opacity 900ms cubic-bezier(0.2,0.8,0.2,1);
+	will-change: opacity;
 	background: #000;
 }
 
 /* Ensure we can fade the smoke canvas in/out when switching from intro */
 .home-smoke-canvas {
-	transition: opacity 800ms ease;
+	/* keep smoke fade consistent with video crossfade timing */
+	transition: opacity 900ms cubic-bezier(0.2,0.8,0.2,1);
+	will-change: opacity;
 }
 .home-bg {
 	position: relative;
@@ -1211,6 +1217,12 @@ padding: 0 1rem;
 	font-family: 'XBall', Arial, sans-serif;
 }
 .community-frame .frame-body { padding-top:8px; }
+/* Fallback message shown when embedded widgets fail to load */
+.discord-fallback {
+	padding: 8px 12px;
+	text-align: center;
+	color: rgba(220,240,255,0.9);
+}
 .discord-embed-wrap { width:100%; border-radius:10px; overflow:hidden; background:rgba(0,0,0,0.06); border: 1px solid rgba(var(--seahawks-blue-rgb), 0.06); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02); }
 .discord-embed { width:100%; height:420px; border:0; display:block; background: #000; }
 
@@ -1813,6 +1825,30 @@ padding: 0 1rem;
 	flex-direction: column;
 	flex: 1 1 0%;
 	border-radius: 18px; /* match opened cards */
+}
+
+/* When every card is closed, make the card icons slightly larger on desktop
+   to improve tappability/visibility as requested. This only applies on
+   larger viewports to avoid crowding on small screens. */
+@media (min-width: 901px) {
+	/* Center closed-card icons and make them larger for desktop */
+	.options.all-closed .option .icon {
+		min-width: 120px;
+		max-width: 120px;
+		height: 120px;
+	}
+	.options.all-closed .option .icon .option-icon {
+		width: 96px;
+		height: 96px;
+	}
+	/* Keep the icon label centered horizontally and lift slightly */
+	.options.all-closed .option .label {
+		bottom: 40px; /* raise the label (and icon) */
+		left: 50%;
+		transform: translateX(-50%);
+	}
+	/* reset any nudges so icon stays visually centered */
+	.options.all-closed .option .label .icon { transform: none; }
 }
 .option.active {
 	flex: 8 1 0%;
