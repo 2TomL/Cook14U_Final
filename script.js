@@ -756,8 +756,12 @@ ensureThree(function initGreenSmoke() {
 			entries.forEach(entry => {
 				if (!entry.isIntersecting) return;
 				if (!hero.dataset.loaded) {
-					hero.src = hero.dataset.src;
-					hero.dataset.loaded = '1';
+					// Delay start slightly so the background video begins a tenth of a second later
+					// This helps avoid instantaneous visual jump on some displays
+					const VIDEO_START_DELAY_MS = 100; // 0.1s
+					setTimeout(function(){
+						try { hero.src = hero.dataset.src; hero.dataset.loaded = '1'; } catch (e) { console.warn('Failed to set hero.src', e); }
+					}, VIDEO_START_DELAY_MS);
 				}
 				obs.disconnect();
 			});
