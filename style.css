@@ -1623,6 +1623,18 @@ padding: 0 1rem;
 	transition: transform 220ms ease, box-shadow 220ms ease, filter 220ms ease, border-radius 180ms ease;
 	/* animation only on hover/focus per request */
 }
+
+/* Prevent vertical distortion: constrain max-height while preserving aspect ratio */
+.merch-buystation img {
+	object-fit: contain;
+	max-height: 420px;
+}
+
+/* Slightly smaller buy-station on mobile so it fits neatly */
+@media (max-width: 900px) {
+	.merch-buystation { width: 300px; }
+	.merch-buystation img { max-height: 300px; }
+}
 .merch-buystation:focus-visible,
 .merch-buystation:hover {
 	outline: none;
