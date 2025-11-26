@@ -1684,9 +1684,11 @@ padding: 0 1rem;
 	border-radius: 0; /* remove rounded corners */
 	 /* Remove the rectangular box-shadow so only the drop-shadow (which follows
 		 the PNG alpha) remains visible. */
-	 box-shadow: none !important;
-	 /* Subtler outer glow that follows the image alpha mask (cutout figure) with a lighter color */
-	 filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 18px rgba(255,220,160,0.42));
+	box-shadow: none !important;
+	/* Subtler outer glow that follows the image alpha mask (cutout figure) with a warm sunlight color */
+	/* Changed from a brownish tint to a golden sunlight hue */
+	/* test: use site green for glow so we can compare visuals with existing site color */
+	filter: drop-shadow(0 4px 8px rgba(0,0,0,0.45)) drop-shadow(0 0 6px rgba(2, 248, 64, 0.78));
 }
 
 /* also ensure the anchor wrapper itself doesn't show a rectangular shadow or background when hovered */
