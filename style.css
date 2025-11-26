@@ -85,7 +85,7 @@
 }
 .video-container {
 	position: absolute;
-	top: 19vh;
+	top: 21vh;
 	left: 50%;
 	transform: translateX(-50%);
 	width: 44vw;
@@ -1688,7 +1688,7 @@ padding: 0 1rem;
 	/* Subtler outer glow that follows the image alpha mask (cutout figure) with a warm sunlight color */
 	/* Changed from a brownish tint to a golden sunlight hue */
 	/* test: use site green for glow so we can compare visuals with existing site color */
-	filter: drop-shadow(0 4px 8px rgba(0,0,0,0.45)) drop-shadow(0 0 6px rgba(2, 248, 64, 0.78));
+	filter: drop-shadow(0 6px 10px rgba(0,0,0,0.45)) drop-shadow(0 0 8px rgba(0,155,39,0.78));
 }
 
 /* also ensure the anchor wrapper itself doesn't show a rectangular shadow or background when hovered */

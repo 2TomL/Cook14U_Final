@@ -864,25 +864,20 @@ ensureThree(function initGreenSmoke() {
 
 	const optionsContainer = document.querySelector('.options');
 
-	// Keep reference to the default active option (as provided in HTML)
 	const defaultActive = document.querySelector('.option.active');
 
-	// media query to decide mobile vs desktop behavior (match CSS breakpoint)
 	const mq = window.matchMedia('(max-width: 900px)');
 	let mobileMode = mq.matches || window.innerWidth <= 900;
 
 	function setMobileDefaults() {
-		// Small screen: ensure all options start closed and container is not in single-open mode
 		options.forEach(o => o.classList.remove('active'));
 		if (optionsContainer) optionsContainer.classList.remove('single-open');
 	}
 
 	function restoreDesktopDefaults() {
-		// Large screen: restore default active option if none is active
 		const anyActive = document.querySelector('.option.active');
 		if (!anyActive && defaultActive) {
 			defaultActive.classList.add('active');
-			// load embeds for the restored active card
 			loadEmbedsInOption(defaultActive);
 		}
 	}
