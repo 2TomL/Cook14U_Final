@@ -1474,3 +1474,22 @@ function initYouTubeForIframe(iframe, optionEl) {
 		checkNow();
 		setInterval(checkNow, 60000);
 	})();
+
+	// Ensure merch buy-station doesn't keep focus/hover glow after click
+	document.addEventListener('DOMContentLoaded', function(){
+		const merch = document.querySelector('.merch-buystation');
+		if (!merch) return;
+		// On click (mouse) blur the element shortly after so focus styles/hover don't persist
+		merch.addEventListener('click', function(e){
+			// if the anchor opens a new tab the browser may keep focus; remove it to clear visual state
+			const el = e.currentTarget || this;
+			setTimeout(() => { try { el.blur(); } catch(err) {} }, 60);
+		});
+		// For keyboard activation, also blur after keypress to remove focus glow
+		merch.addEventListener('keydown', function(e){
+			if (e.key === 'Enter' || e.key === ' ') {
+				const el = e.currentTarget || this;
+				setTimeout(() => { try { el.blur(); } catch(err) {} }, 60);
+			}
+		});
+	});

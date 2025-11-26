@@ -1590,6 +1590,113 @@ padding: 0 1rem;
 	font-size: 0.95rem;
 	margin-top: 24px;
 }
+
+/* Merch buystation: animated Warzone-style clickable logo */
+.merch-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+	width: 100%;
+	padding: 28px 12px;
+	box-sizing: border-box;
+}
+.merch-buystation {
+	position: relative;
+	display: inline-block;
+	width: 360px;
+	max-width: 92%;
+	border-radius: 12px;
+	overflow: visible;
+	cursor: pointer;
+	will-change: transform;
+}
+.merch-buystation img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 12px;
+	/* Remove rectangular box-shadow by default; use a subtle drop-shadow so the shadow follows the PNG alpha */
+	box-shadow: none;
+	filter: drop-shadow(0 4px 10px rgba(0,0,0,0.45));
+	transform-origin: center center;
+	transition: transform 220ms ease, box-shadow 220ms ease, filter 220ms ease, border-radius 180ms ease;
+	/* animation only on hover/focus per request */
+}
+.merch-buystation:focus-visible,
+.merch-buystation:hover {
+	outline: none;
+}
+.merch-buystation:hover img,
+.merch-buystation:focus img,
+.merch-buystation:focus-visible img {
+	transform: translateY(-6px) scale(1.02) rotate(0.6deg);
+	box-shadow: 0 18px 56px rgba(0,0,0,0.66), 0 10px 36px rgba(0,0,0,0.5);
+	filter: saturate(1.06) brightness(1.02);
+	animation: buystationIdle 2600ms cubic-bezier(.2,.9,.2,1) infinite;
+}
+/* The visual glow should follow the PNG cutout itself (alpha mask). Use
+   CSS filter drop-shadow on the image on hover/focus so the glow matches
+   the figure's opaque pixels rather than the rectangular frame. */
+.merch-buystation .merch-glow { display: none; }
+
+
+@keyframes buystationIdle {
+	0% { transform: translateY(0) rotate(-0.6deg) scale(1); }
+	45% { transform: translateY(-5px) rotate(0.6deg) scale(1.015); }
+	100% { transform: translateY(0) rotate(-0.6deg) scale(1); }
+}
+@keyframes merchGlowPulse {
+	0% { transform: translate(-50%, -50%) scale(0.98); opacity: 0.9; }
+	50% { transform: translate(-50%, -52%) scale(1.03); opacity: 1; }
+	100% { transform: translate(-50%, -50%) scale(0.98); opacity: 0.9; }
+}
+
+.merch-text p {
+	margin: 0;
+	color: #eaf8ff;
+	text-align: center;
+	max-width: 920px;
+	line-height: 1.45;
+}
+.merch-text a {
+	color: rgba(var(--seahawks-blue-rgb), 1);
+	font-weight: 800;
+	text-decoration: underline;
+}
+
+/* keyboard focus box for accessibility */
+
+.merch-buystation:focus {
+	box-shadow: 0 0 0 6px rgba(var(--seahawks-blue-rgb), 0.12), 0 12px 36px rgba(0,0,0,0.6);
+	border-radius: 12px;
+}
+
+/* On hover or active (click) remove the rounded frame around the photo as requested */
+.merch-buystation:hover img,
+.merch-buystation:active img,
+.merch-buystation:focus img,
+.merch-buystation:focus-visible img {
+	border-radius: 0; /* remove rounded corners */
+	 /* Remove the rectangular box-shadow so only the drop-shadow (which follows
+		 the PNG alpha) remains visible. */
+	 box-shadow: none !important;
+	 /* Subtler outer glow that follows the image alpha mask (cutout figure) with a lighter color */
+	 filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 18px rgba(255,220,160,0.42));
+}
+
+/* also ensure the anchor wrapper itself doesn't show a rectangular shadow or background when hovered */
+.merch-buystation:hover,
+.merch-buystation:focus,
+.merch-buystation:active {
+	background: transparent;
+	box-shadow: none;
+}
+
+@media (max-width: 900px) {
+	.merch-buystation { width: 92%; }
+	.merch-card { padding: 18px 8px; }
+}
 .site-footer .footer-inner { max-width: 1100px; margin: 0 auto; }
 .site-footer .footer-link {
 	color: rgba(var(--seahawks-blue-rgb), 1);
@@ -1867,7 +1974,8 @@ padding: 0 1rem;
 		height: auto;
 		display: flex;
 		flex-direction: column;
-		justify-content: flex-end;
+		justify-content: center; /* vertically center icon */
+		align-items: center; /* horizontally center icon and label */
 		padding: 6px 8px;
 	}
 	/* hide panel content for closed cards but keep label visible */
@@ -1885,6 +1993,20 @@ padding: 0 1rem;
 	.options .option.active { flex: 1 1 72%; min-width: 220px; max-width: 720px; }
 }
 
+/* Mobile adjustment: when a content card is opened, nudge video slightly down and icon slightly up */
+@media (max-width: 900px) {
+	.options .option.active .panel .embed-iframe {
+		transform: translateY(6px);
+		transition: transform 220ms ease;
+	}
+	.options .option.active .label .icon {
+		transform: translateY(-18px);
+		transition: transform 220ms ease;
+	}
+	/* ensure img/icon transforms don't conflict with existing rules on closed cards */
+	.options .option .label .icon { will-change: transform; }
+}
+
 /* Mobile-side tabs: a compact vertical group shown only on small screens */
 .mobile-side-tabs {
 	display: none; /* default hidden; enabled below for small screens */
@@ -1895,9 +2017,14 @@ padding: 0 1rem;
 	.mobile-side-tabs {
 		position: fixed;
 		right: 14px;
-		bottom: 16px;
-		display: block; /* ensure visible on small screens (overrides default display:none) */
-		width: 64px;
+		position: relative; 
+		bottom: auto; 
+		left: auto; 
+		transform: none; 
+		display:flex; 
+		align-items:center; 
+		justify-content:center; 
+		height: auto; 
 		height: 64px;
 		z-index: 2000;
 		pointer-events: none; /* enabled when open */
@@ -1998,4 +2125,14 @@ padding: 0 1rem;
 	padding: 4px 6px;
 	border-radius: 4px;
 	z-index: 100000 !important;
+}
+
+/* Ensure consistent icon sizing across all content cards on small screens
+   and keep closed cards visually stable across device sizes. These rules
+   override earlier mobile-specific icon sizing to make icons uniform. */
+@media (max-width: 900px) {
+    .option .icon { width: 80px; height: 80px; min-width: 80px; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+    .option .icon .option-icon { width: 64px; height: 64px; max-width: 64px; max-height: 64px; }
+    /* Keep closed cards consistent height so icons sit centrally on all phones */
+    .option:not(.active) { min-height: 120px; }
 }
