@@ -1412,8 +1412,10 @@ function initYouTubeForIframe(iframe, optionEl) {
 			isLive = !!v;
 			if (isLive) btn.classList.add('is-live'); else btn.classList.remove('is-live');
 			btn.setAttribute('aria-pressed', String(isLive));
-			// Use translation helper if available
 			btn.title = isLive ? t('live_online_title', 'Cook14U is LIVE — click to open Twitch') : t('live_offline_title', 'Offline — click to open Discord (or open community)');
+			// Toon of verberg de LIVE!-label
+			var liveLabel = btn.querySelector('.live-label');
+			if (liveLabel) liveLabel.style.display = isLive ? 'inline-block' : 'none';
 		}
 
 		// Initialize UI to a deterministic state: respect manual forced override if present (session only),

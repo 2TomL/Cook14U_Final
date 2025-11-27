@@ -23,7 +23,10 @@
 			</a>
 			<!-- Live indicator: shows camera icon; when live animated background appears -->
 			<button id="live-indicator" class="live-indicator" aria-label="Live status" title="Live status">
-				<img src="assets/video-camera.png" alt="Live" width="28" height="28" decoding="async" loading="lazy" />
+				<span class="live-flex">
+					<img src="assets/video-camera.png" alt="Live" width="28" height="28" decoding="async" loading="lazy" />
+					<span class="live-label" aria-hidden="true">LIVE!</span>
+				</span>
 			</button>
 
 			<!-- Language switcher -->
