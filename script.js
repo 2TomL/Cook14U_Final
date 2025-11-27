@@ -1397,16 +1397,11 @@ function initYouTubeForIframe(iframe, optionEl) {
 		// Twitch API Credentials
 		// WARNING: Storing Client Secret in client-side code is insecure as it is visible to anyone inspecting the source.
 		// Ideally, this should be handled by a backend proxy. Proceeding as requested for static site.
-		const CLIENT_ID = '7a57wo4g9h61fnxr8td9dmnibkjr2b';
-		const CLIENT_SECRET = 'lhdr67w4klu9jvnjb64m6p0d65xf6x';
 		const CHANNEL_NAME = 'cook14u';
 
 		let forced = sessionStorage.getItem('cook14u_force_live') === '1';
 		let isLive = false;
 		let cachedUserId = localStorage.getItem('cook14u_twitch_userid');
-
-		// Demo toggle button (temporary): wire a small visible toggle to force live state for testing
-		// demo button removed from DOM; use sessionStorage for non-persistent force override
 
 		function setLive(v){
 			isLive = !!v;
